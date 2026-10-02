@@ -3,19 +3,24 @@ import { Picture } from 'astro:assets';
 // Photo: Ofspace LLC on Unsplash (photo-1681164315051), free under the Unsplash License. Swap for an in-house team shot any time.
 import team from '../../assets/images/team-developers.jpg';
 import CornerBrackets from '../ui/CornerBrackets.astro';
+import VideoTheatre from '../ui/VideoTheatre.astro';
+import { film } from '../../data/home';
 ---
 <div class="container media-wrap">
   <figure class="media duotone" data-clip>
     <Picture src={team} formats={['avif', 'webp']} widths={[640, 960, 1286, 1800]} sizes="(min-width: 1440px) 1286px, 100vw"
       alt="A team of developers coding together on laptops around a studio table" loading="eager" fetchpriority="high" />
     <CornerBrackets color="#fff" inset={24} size={46} weight={3} />
-    <a class="play" href="/projects/" aria-label="See our work" data-cursor="See Our Work">
+    <!-- Without JS this opens Mux's hosted player; with JS the custom theatre in VideoTheatre.astro takes over. -->
+    <a class="play" href={`https://player.mux.com/${film.playbackId}`} aria-label={`Play video: ${film.title}`} aria-haspopup="dialog"
+       data-cursor={film.label} data-film-open target="_blank" rel="noopener">
       <span class="play__ripple" aria-hidden="true"></span><span class="play__ripple" aria-hidden="true"></span><span class="play__ripple" aria-hidden="true"></span>
       <span class="play__disc" aria-hidden="true"></span>
       <svg class="play__icon" width="60" height="72" viewBox="0 0 60 72" aria-hidden="true" focusable="false"><path d="M0 0L60 36L0 72Z" fill="#fff" /></svg>
     </a>
-    <figcaption class="visually-hidden">Developers collaborating on a product build.</figcaption>
+    <figcaption class="visually-hidden">Developers collaborating on a product build. Play the studio film: {film.title}.</figcaption>
   </figure>
+  <VideoTheatre {...film} />
 </div>
 <style>
   .media-wrap { padding-top: 19px; }
@@ -41,9 +46,12 @@ import CornerBrackets from '../ui/CornerBrackets.astro';
     8% { opacity: .75; }
     100% { transform: scale(2.35); opacity: 0; }
   }
-  .play:hover .play__disc { transform: scale(1.06); background: rgb(255 255 255 / .16); border-color: rgb(255 255 255 / .9); }
-  .play:hover .play__icon { transform: scale(1.08); }
-  .play:hover .play__ripple { animation-duration: 2.4s; }
+  /* the whole photo is the hit area; the disc stays centred */
+  .play::after { content: ''; position: absolute; left: 50%; top: 50%; width: 200vw; height: 200vh; transform: translate(-50%, -50%); }   /* clipped by the figure */
+  .media { cursor: pointer; }
+  .media:hover .play__disc, .play:hover .play__disc { transform: scale(1.06); background: rgb(255 255 255 / .16); border-color: rgb(255 255 255 / .9); }
+  .media:hover .play__icon, .play:hover .play__icon { transform: scale(1.08); }
+  .media:hover .play__ripple, .play:hover .play__ripple { animation-duration: 2.4s; }
   .play:focus-visible { outline: 2px solid #fff; outline-offset: 6px; }
   @media (prefers-reduced-motion: reduce) { .play__ripple { animation: none; opacity: 0; } }
 </style>

@@ -3,6 +3,14 @@ export const hero = {
   lead: 'Quixt Is A Development Agency Crafting High-Performance Websites, Apps, And Software Solutions For Startups And Growing Businesses.',
 };
 
+/** Studio film behind the hero photo. Hosted on Mux (public playback ID), played in the custom theatre player. */
+export const film = {
+  playbackId: 'rR8P8mSaKDzz02TsftugTUdI00cQPJX00oy',
+  label: 'Why Us',
+  title: 'Why Quixt',
+  eyebrow: '01 · Studio Film',
+};
+
 export const about = [
   {
     id: 'agency',

@@ -66,6 +66,9 @@ function init() {
     allowNestedScroll: true,
   });
   lenis.on('scroll', ScrollTrigger.update);
+  // Overlays (e.g. the video theatre) pause page scrolling while they are open.
+  window.addEventListener('quixt:lock', () => lenis.stop());
+  window.addEventListener('quixt:unlock', () => lenis.start());
   gsap.ticker.add((time) => lenis.raf(time * 1000));
   gsap.ticker.lagSmoothing(0);
 

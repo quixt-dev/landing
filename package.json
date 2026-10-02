@@ -3,7 +3,7 @@
   "type": "module",
   "version": "1.0.0",
   "private": true,
-  "description": "Marketing website for Quixt \u2014 a development agency building websites, apps and SaaS products.",
+  "description": "Marketing website for Quixt — a development agency building websites, apps and SaaS products.",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -19,6 +19,7 @@
     "@fontsource/roboto-mono": "^5.3.0",
     "astro": "^7.3.5",
     "gsap": "^3.15.0",
+    "hls.js": "^1.7.3",
     "lenis": "^1.3.26"
   },
   "devDependencies": {

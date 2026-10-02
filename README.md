@@ -271,6 +271,11 @@ All motion lives in [`src/scripts/motion.ts`](src/scripts/motion.ts). Components
 
 The canvas globes in `src/scripts/globes.ts` revolve with Natural Earth land dots. On the contact page the globe adds flight trails, a pulsing HQ marker and drag-to-spin with momentum. Page changes use native cross-document View Transitions.
 
+**Studio film.** The hero photo opens a custom theatre player ([`VideoTheatre.astro`](src/components/ui/VideoTheatre.astro) and [`videoTheatre.ts`](src/scripts/videoTheatre.ts)) for a Mux public playback ID, which is set in `film` in `src/data/home.ts`.
+- The photo morphs into the stage when the player opens.
+- The player has adaptive HLS, a scrub bar with storyboard previews, and speed and quality menus. It also supports captions when the asset has them, picture-in-picture, fullscreen, keyboard shortcuts and double-tap seeking on touch screens.
+- hls.js loads only when a visitor shows intent to play. Without JavaScript, the link opens Mux's hosted player.
+
 > [!NOTE]
 > If `prefers-reduced-motion` is set, all motion is skipped. Animations also pause while off-screen.
 
