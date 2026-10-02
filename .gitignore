@@ -17,3 +17,7 @@ videos/
 .claude/
 .DS_Store
 *.log
+
+# wrangler local state
+.wrangler/
+.dev.vars*

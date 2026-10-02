@@ -9,7 +9,7 @@ export default defineConfig({
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
   integrations: [
     sitemap({
-      filter: (page) => !page.includes('/404'),
+      filter: (page) => !page.includes('/404') && !page.includes('/contact/thanks'),
       changefreq: 'monthly',
       lastmod: new Date(),
       priority: 0.7,

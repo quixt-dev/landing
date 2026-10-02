@@ -1,7 +1,8 @@
 ---
 /**
  * "Book a free call" card. Renders a static month at build time; a small script
- * re-renders the current month and wires date/time into the booking link.
+ * re-renders the current month and keeps the picked date/time in hidden fields.
+ * Posts to /api/book (worker/index.ts), which emails the request to the team inbox.
  */
 import { site } from '../../data/site';
 const now = new Date();
@@ -15,7 +16,11 @@ const slots = ['10:00', '11:30', '15:00', '17:30'];
   <p class="eyebrow">Prefer To Talk?</p>
   <h3 id="book-title" class="book__title">Book A Free<br />30-Min Call</h3>
   <p class="book__lead">No Preparation Needed. Bring Your Idea. We’ll Bring The Questions.</p>
-  <div class="cal" data-cal data-booking={site.bookingUrl}>
+  <form class="cal" data-cal action={site.bookAction} method="post">
+    <input type="hidden" name="date" value="" data-date />
+    <input type="hidden" name="tz" value="" data-tz />
+    <input type="hidden" name="_t" value="" data-started />
+    <div class="hp" aria-hidden="true"><label>Leave This Empty <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" /></label></div>
     <div class="cal__head"><p class="cal__month" data-month aria-live="polite">{monthName}</p>
       <span class="cal__nav"><button type="button" data-prev aria-label="Previous month">‹</button><button type="button" data-next aria-label="Next month">›</button></span></div>
     <div class="cal__grid" role="group" aria-label="Choose a date">
@@ -27,27 +32,45 @@ const slots = ['10:00', '11:30', '15:00', '17:30'];
     </div>
     <p class="cal__sel" data-sel>Pick A Weekday</p>
     <div class="slots" role="radiogroup" aria-label="Choose a time">
-      {slots.map((s, i) => <label class="slot"><input type="radio" name="slot" value={s} checked={i === 2} /><span>{s}</span></label>)}
+      {slots.map((s, i) => <label class="slot"><input type="radio" name="time" value={s} checked={i === 2} /><span>{s}</span></label>)}
     </div>
-    <p class="cal__tz">Times In IST · Shown In Your Timezone On Booking</p>
-    <a class="book__btn" href={site.bookingUrl} data-book data-fill target="_blank" rel="noopener">Book A Call <span aria-hidden="true">→</span></a>
+    <p class="cal__tz" data-local>Times In IST</p>
+    <div class="who">
+      <label class="who__f"><span>Your Name</span><input name="name" type="text" autocomplete="name" placeholder="e.g. Priya Sharma" required /></label>
+      <label class="who__f"><span>Email</span><input name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@company.com" required /></label>
+    </div>
+    <button type="submit" class="book__btn" data-book data-fill>Request A Call <span aria-hidden="true">→</span></button>
+    <p class="book__status" data-status role="status" aria-live="polite" hidden></p>
+  </form>
+  <div class="booked" data-booked tabindex="-1" hidden>
+    <span class="booked__mark" aria-hidden="true">✓</span>
+    <p class="booked__title">Request Sent.</p>
+    <p class="booked__text" data-booked-text>We’ll Confirm Your Slot By Email Within A Few Hours, With A Calendar Invite And A Video Link.</p>
   </div>
 </section>
 <script>
-  const cal = document.querySelector<HTMLElement>('[data-cal]');
+  const cal = document.querySelector<HTMLFormElement>('[data-cal]');
   if (cal) {
-    const base = cal.dataset.booking!;
-    const daysEl = cal.querySelector<HTMLElement>('[data-days]')!, monthEl = cal.querySelector('[data-month]')!, selEl = cal.querySelector('[data-sel]')!, btn = cal.querySelector<HTMLAnchorElement>('[data-book]')!;
+    const daysEl = cal.querySelector<HTMLElement>('[data-days]')!, monthEl = cal.querySelector('[data-month]')!, selEl = cal.querySelector('[data-sel]')!, btn = cal.querySelector<HTMLButtonElement>('[data-book]')!;
+    const dateEl = cal.querySelector<HTMLInputElement>('[data-date]')!, localEl = cal.querySelector<HTMLElement>('[data-local]')!, status = cal.querySelector<HTMLElement>('[data-status]')!;
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    cal.querySelector<HTMLInputElement>('[data-tz]')!.value = tz;
+    cal.querySelector<HTMLInputElement>('[data-started]')!.value = String(Date.now());
     const today = new Date(); today.setHours(0, 0, 0, 0);
     let view = new Date(today.getFullYear(), today.getMonth(), 1);
     let picked: Date | null = null;
     const fmt = (d: Date) => d.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long' });
     const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    const slot = () => cal.querySelector<HTMLInputElement>('input[name="slot"]:checked')?.value ?? '';
+    const slot = () => cal.querySelector<HTMLInputElement>('input[name="time"]:checked')?.value ?? '';
     const sync = () => {
       selEl.textContent = picked ? fmt(picked) : 'Pick A Weekday';
-      btn.href = picked ? `${base}?date=${iso(picked)}&time=${encodeURIComponent(slot())}` : base;
-      btn.innerHTML = picked ? `Book ${picked.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })} · ${slot()} <span aria-hidden="true">→</span>` : 'Book A Call <span aria-hidden="true">→</span>';
+      dateEl.value = picked ? iso(picked) : '';
+      btn.innerHTML = picked ? `Request ${picked.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })} · ${slot()} <span aria-hidden="true">→</span>` : 'Request A Call <span aria-hidden="true">→</span>';
+      // Show the slot in the visitor's own timezone when it differs from IST.
+      const t = slot(), d = picked ?? today;
+      const at = new Date(`${iso(d)}T${t}:00+05:30`);
+      const local = at.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
+      localEl.textContent = tz === 'Asia/Kolkata' || tz === 'Asia/Calcutta' ? 'Times In IST' : `Times In IST · ${t} IST Is ${local} For You`;
     };
     const render = () => {
       monthEl.textContent = view.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -72,6 +95,24 @@ const slots = ['10:00', '11:30', '15:00', '17:30'];
     cal.querySelector('[data-next]')!.addEventListener('click', () => { view = new Date(view.getFullYear(), view.getMonth() + 1, 1); render(); });
     cal.addEventListener('change', sync);
     render(); sync();
+
+    const booked = document.querySelector<HTMLElement>('[data-booked]')!;
+    cal.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!cal.reportValidity()) return;
+      const label = btn.innerHTML;
+      btn.disabled = true; btn.textContent = 'Sending…'; status.hidden = true;
+      try {
+        const res = await fetch(cal.action, { method: 'POST', body: new FormData(cal as HTMLFormElement), headers: { Accept: 'application/json' } });
+        const data = await res.json().catch(() => ({ ok: false }));
+        if (!res.ok || !data.ok) throw new Error(data.error || 'Couldn’t Send Your Request. Please Try Again.');
+        if (picked) booked.querySelector('[data-booked-text]')!.textContent = `You Asked For ${fmt(picked)} At ${slot()} IST. We’ll Confirm By Email Within A Few Hours, With A Calendar Invite And A Video Link.`;
+        cal.hidden = true; booked.hidden = false; booked.focus({ preventScroll: true });
+      } catch (err) {
+        status.textContent = (err as Error).message || 'Couldn’t Send Your Request. Please Email build@quixt.dev.'; status.hidden = false;
+        btn.disabled = false; btn.innerHTML = label;
+      }
+    });
   }
 </script>
 <style>
@@ -107,5 +148,20 @@ const slots = ['10:00', '11:30', '15:00', '17:30'];
   .book__btn:hover::before, .book__btn:focus-visible::before { clip-path: circle(150% at var(--fx, 50%) var(--fy, 100%)); }
   .book__btn span { display: inline-block; transition: transform .5s cubic-bezier(.16,1,.3,1); }
   .book__btn:hover span { transform: translateX(5px); }
+  .hp { position: absolute; left: -9999px; }
+  .cal[hidden], .booked[hidden] { display: none; }
+  .who { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 18px; }
+  .who__f { display: grid; gap: 6px; font-size: 0.72rem; color: var(--on-brand-muted); }
+  .who__f input { width: 100%; padding: 12px 12px; background: rgb(255 255 255 / .08); border: 1.2px solid rgb(255 255 255 / .35); color: var(--white); font-size: 0.84rem; border-radius: 0; }
+  .who__f input::placeholder { color: rgb(255 255 255 / .55); }
+  .who__f input:focus { outline: none; border-color: var(--white); background: rgb(255 255 255 / .14); }
+  @media (max-width: 420px) { .who { grid-template-columns: 1fr; } }
+  .book__btn { width: 100%; cursor: pointer; }
+  .book__btn:disabled { opacity: .75; cursor: progress; }
+  .book__status { margin-top: 10px; font-size: 0.78rem; color: var(--white); background: rgb(0 0 0 / .18); padding: 10px 12px; }
+  .booked { display: grid; gap: 12px; justify-items: start; padding: 28px 0 8px; outline: none; }
+  .booked__mark { width: 48px; height: 48px; display: grid; place-items: center; background: var(--white); color: var(--brand); font-size: 1.3rem; }
+  .booked__title { font-family: var(--font-display); font-size: 1.6rem; letter-spacing: var(--track-l); }
+  .booked__text { font-size: 0.875rem; line-height: 1.6; color: var(--on-brand-muted); }
   @media (max-width: 600px) { .book { padding-left: var(--card-x-m); padding-right: var(--card-x-m); } }   /* unified mobile card inset */
 </style>

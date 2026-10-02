@@ -17,7 +17,7 @@ const steps = ['Your Idea', 'Where You Are', 'The Details', 'Budget & Contact'];
     <div class="progress__bar" aria-hidden="true">{steps.map((_, i) => <span data-seg={i} class:list={[i === 0 && 'on']}></span>)}</div>
   </div>
   <input type="hidden" name="plan" value="" data-plan />
-  <input type="hidden" name="_subject" value="New Project Brief · quixt.dev" />
+  <input type="hidden" name="_t" value="" data-started />
   <div class="hp" aria-hidden="true"><label>Leave This Empty <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" /></label></div>
 
   <fieldset class="step" data-step="0" aria-describedby="s1-help">
@@ -82,7 +82,13 @@ const steps = ['Your Idea', 'Where You Are', 'The Details', 'Budget & Contact'];
 
   <div class="submit">
     <label class="nda"><input type="checkbox" name="nda" value="yes" /><span class="box" aria-hidden="true"></span><span><strong>Send Me An NDA Before We Talk</strong><small>No Commitment, No Spam. A Real Person Replies Within 24 Hours.</small></span></label>
-    <button type="submit" class="send" data-fill>Send My Idea <span aria-hidden="true">→</span></button>
+    <button type="submit" class="send" data-fill data-send>Send My Idea <span aria-hidden="true">→</span></button>
+  </div>
+  <p class="status" data-status role="status" aria-live="polite" hidden></p>
+  <div class="done" data-done tabindex="-1" hidden>
+    <span class="done__mark" aria-hidden="true">✓</span>
+    <h3 class="done__title">Got It. Your Idea Is With Us.</h3>
+    <p class="done__text">A Real Person Will Read Your Brief And Reply Within 24 Hours, Usually Much Sooner. Keep An Eye On Your Inbox (And Spam Folder, Just In Case).</p>
   </div>
 </form>
 <script>
@@ -115,6 +121,33 @@ const steps = ['Your Idea', 'Where You Are', 'The Details', 'Budget & Contact'];
     }));
     const plan = new URLSearchParams(location.search).get('plan');
     if (plan) form.querySelector<HTMLInputElement>('[data-plan]')!.value = plan;
+
+    // Submit with fetch so the visitor stays on the page; without JS the form posts natively and lands on /contact/thanks/.
+    form.querySelector<HTMLInputElement>('[data-started]')!.value = String(Date.now());
+    const status = form.querySelector<HTMLElement>('[data-status]')!, send = form.querySelector<HTMLButtonElement>('[data-send]')!, doneEl = form.querySelector<HTMLElement>('[data-done]')!;
+    const files = form.querySelector<HTMLInputElement>('input[name="attachment"]')!;
+    const say = (msg: string, bad = false) => { status.hidden = !msg; status.textContent = msg; status.classList.toggle('status--bad', bad); };
+    files.addEventListener('change', () => {
+      const total = [...(files.files ?? [])].reduce((n, f) => n + f.size, 0);
+      say(total > 3.5 * 1024 * 1024 ? 'Attachments Over 3.5 MB In Total Won’t Fit In The Email. Send A Smaller File, Or Email Larger Ones To build@quixt.dev.' : files.files?.length ? `${files.files.length} File${files.files.length > 1 ? 's' : ''} Attached.` : '', total > 3.5 * 1024 * 1024);
+    });
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!form.reportValidity()) return;
+      const label = send.innerHTML;
+      send.disabled = true; send.textContent = 'Sending…'; say('');
+      try {
+        const res = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } });
+        const data = await res.json().catch(() => ({ ok: false }));
+        if (!res.ok || !data.ok) throw new Error(data.error || 'Couldn’t Send Your Brief. Please Try Again.');
+        [...form.children].forEach((el) => { if (el !== doneEl) (el as HTMLElement).hidden = true; });
+        doneEl.hidden = false; doneEl.focus({ preventScroll: true });
+        doneEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } catch (err) {
+        say((err as Error).message || 'Couldn’t Send Your Brief. Please Try Again Or Email build@quixt.dev.', true);
+        send.disabled = false; send.innerHTML = label;
+      }
+    });
   }
 </script>
 <style>
@@ -206,5 +239,14 @@ const steps = ['Your Idea', 'Where You Are', 'The Details', 'Budget & Contact'];
   .send:hover::before, .send:focus-visible::before { clip-path: circle(150% at var(--fx, 50%) var(--fy, 100%)); }
   .send span { display: inline-block; transition: transform .5s cubic-bezier(.16,1,.3,1); }
   .send:hover span { transform: translateX(6px); }
+  .brief > [hidden] { display: none !important; }
+  .send:disabled { opacity: .7; cursor: progress; }
+  .status { font-size: 0.8125rem; color: var(--brand-ink); margin-top: -20px; }
+  .status--bad { color: #c2261a; }
+  .done { display: grid; gap: 14px; justify-items: start; padding: clamp(24px, 4vw, 56px) 0; outline: none; animation: label-in .8s cubic-bezier(.16,1,.3,1); }
+  .done[hidden] { display: none; }
+  .done__mark { width: 56px; height: 56px; display: grid; place-items: center; background: var(--brand); color: var(--white); font-size: 1.5rem; }
+  .done__title { font-family: var(--font-display); font-weight: 400; font-size: var(--fs-h3); letter-spacing: var(--track-l); word-spacing: var(--words-l); line-height: 1.2; }
+  .done__text { max-width: 52ch; color: var(--brand-ink); font-size: 0.9375rem; }
   @media (max-width: 600px) { .brief { padding-left: var(--card-x-m); padding-right: var(--card-x-m); } }   /* unified mobile card inset */
 </style>

@@ -189,6 +189,8 @@ npm run dev          # → http://localhost:4321
 | `npm run preview` | Serves the production build locally |
 | `npm run check` | Type-checks `.astro` and `.ts` files |
 | `npm run assets` | *(after a build)* Regenerates OG images, icons, favicon and the starter-kit PDFs |
+| `npm run dev:worker` | Builds, then runs the site and the form Worker locally with `wrangler dev` (emails are simulated) |
+| `npm run deploy` | Builds and deploys to Cloudflare Workers (`quixt.dev`, `www.quixt.dev`) |
 
 Regenerate the globe land mask with `node scripts/generate-landmask.mjs`. Rebuild the wordmark with `node scripts/brand/build-logo.mjs`.
 
@@ -245,10 +247,9 @@ All copy is stored in **`src/data/`**. You don't need to touch any components to
 - **To add a case study,** add a `caseStudy` object to a project in `src/data/projects.ts`. The page, sitemap entry, structured data and the `llms-full.txt` section are all generated automatically.
 
 > [!IMPORTANT]
-> **Before going live**, replace these placeholders:
-> - `src/data/site.ts`: `formAction` (Formspree, Basin or your own API) and `bookingUrl` (Cal.com or Calendly), plus the phone, address and social URLs.
+> **Still to review:**
+> - `src/data/site.ts`: the phone number, address and social URLs.
 > - Figures, client names, testimonials and prices in `src/data/*`. Some of these are still sample content from the design.
-> - `site` in `astro.config.mjs`, if the production domain is not `https://quixt.dev`.
 
 <br>
 
@@ -306,13 +307,23 @@ The canvas globes in `src/scripts/globes.ts` revolve with Natural Earth land dot
 
 ## Deployment
 
-The build output in `dist/` is a fully static site, so it can be hosted on any static host or CDN.
+The site runs on **Cloudflare Workers**. The static build in `dist/` is served by [Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/). A small Worker in [`worker/index.ts`](worker/index.ts) handles the forms. Everything is configured in [`wrangler.jsonc`](wrangler.jsonc).
 
 ```bash
-npm run build      # outputs dist/
+npx wrangler login   # once
+npm run deploy       # astro build && wrangler deploy
 ```
 
-`public/_headers` sets the security headers (HSTS, `nosniff`, frame options, permissions policy) and long-lived caching for `/_astro/*` and `/graphics/*`. It uses the **Cloudflare Pages / Netlify** format. On Vercel or Nginx, translate it into that host's config.
+| Endpoint | Used by | What happens |
+| --- | --- | --- |
+| `POST /api/brief` | The 4-step project brief on `/contact/` | Emails the brief, with attachments up to 3.5 MB, to the team inbox. Reply-To is set to the client. |
+| `POST /api/book` | The "Book a free 30-min call" card | Emails the requested date and time (IST), plus the visitor's timezone |
+
+Both forms work without JavaScript: they post natively and land on `/contact/thanks/`. With JavaScript they submit in place and show a confirmation. Spam protection uses a honeypot field, a minimum fill time and a rate limit of 5 requests per minute per IP.
+
+**Email** uses the Worker's `send_email` binding through Cloudflare Email Routing. Emails come from `website@quixt.dev` and go to the inbox set in `INBOX` (`wrangler.jsonc`). That address must be a verified destination under *Email → Email Routing → Destination addresses*. Mail sent to `build@quixt.dev` (and any other `@quixt.dev` address) is forwarded to the same inbox.
+
+`public/_headers` sets the security headers (HSTS, `nosniff`, frame options, permissions policy) and long-lived caching for `/_astro/*` and `/graphics/*`. `www.quixt.dev` 301-redirects to `quixt.dev` through a zone redirect rule.
 
 <br>
 

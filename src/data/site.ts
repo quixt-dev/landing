@@ -19,9 +19,11 @@ export const site = {
   phone: '+91 94227 99861',
   phoneHref: '+919422799861',
   whatsapp: 'https://wa.me/919422799861',
-  bookingUrl: 'https://cal.com/quixt/discovery',
-  /** Replace with your form endpoint (Formspree, Basin, Netlify Forms, your API…). */
-  formAction: 'https://formspree.io/f/your-form-id',
+  /** The booking card on /contact/ posts call requests to /api/book (see worker/index.ts). */
+  bookingUrl: '/contact/#book-a-call',
+  /** Handled by the Cloudflare Worker in worker/index.ts, which emails each brief to the team inbox. */
+  formAction: '/api/brief',
+  bookAction: '/api/book',
   address: {
     street: 'Beltola',
     locality: 'Guwahati',

@@ -3,13 +3,15 @@
   "type": "module",
   "version": "1.0.0",
   "private": true,
-  "description": "Marketing website for Quixt — a development agency building websites, apps and SaaS products.",
+  "description": "Marketing website for Quixt \u2014 a development agency building websites, apps and SaaS products.",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "assets": "node scripts/generate-assets.mjs"
+    "assets": "node scripts/generate-assets.mjs",
+    "deploy": "astro build && wrangler deploy",
+    "dev:worker": "astro build && wrangler dev"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
@@ -25,6 +27,7 @@
     "pdf-lib": "^1.17.1",
     "topojson-client": "^3.1.0",
     "typescript": "^6.0.3",
-    "world-atlas": "^2.0.2"
+    "world-atlas": "^2.0.2",
+    "wrangler": "^4.146.0"
   }
 }
