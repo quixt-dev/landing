@@ -1,0 +1,16 @@
+---
+/** Viewfinder-style corner brackets (decorative). */
+const { color = 'currentColor', inset = 24, size = 40, weight = 2 } = Astro.props as { color?: string; inset?: number; size?: number; weight?: number };
+---
+<span class="cb" aria-hidden="true" style={`--cb-inset:${inset}px;--cb-size:${size}px;--cb-w:${weight}px;--cb-c:${color}`}>
+  <i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>
+</span>
+<style>
+  .cb { position: absolute; inset: var(--cb-inset); pointer-events: none; z-index: 2; }
+  .cb i { position: absolute; width: var(--cb-size); height: var(--cb-size); border: 0 solid var(--cb-c); }
+  .tl { top: 0; left: 0; border-top-width: var(--cb-w) !important; border-left-width: var(--cb-w) !important; }
+  .tr { top: 0; right: 0; border-top-width: var(--cb-w) !important; border-right-width: var(--cb-w) !important; }
+  .bl { bottom: 0; left: 0; border-bottom-width: var(--cb-w) !important; border-left-width: var(--cb-w) !important; }
+  .br { bottom: 0; right: 0; border-bottom-width: var(--cb-w) !important; border-right-width: var(--cb-w) !important; }
+  @media (max-width: 640px) { .cb { inset: calc(var(--cb-inset) * .5); } .cb i { width: calc(var(--cb-size) * .6); height: calc(var(--cb-size) * .6); } }
+</style>

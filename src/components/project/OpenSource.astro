@@ -1,0 +1,67 @@
+---
+/** Open-source section: why-choose-it stats, a GitHub-style license panel and a quickstart terminal. */
+import SectionHeader from '../ui/SectionHeader.astro';
+import Button from '../ui/Button.astro';
+import type { CaseStudy } from '../../data/projects';
+const { os, name } = Astro.props as { os: NonNullable<CaseStudy['openSource']>; name: string };
+const perms = ['Commercial use', 'Modification', 'Distribution', 'Private use'];
+const conds = ['License and copyright notice'];
+const limits = ['Liability', 'Warranty'];
+---
+<section class="section container" aria-labelledby="os-title">
+  <SectionHeader id="os-title" eyebrow="06 · Open Source" title={`Free For Anyone.\n${os.license} Licensed.`} lead={`${name} Is Open Source Under The ${os.license} License. Use It, Fork It, Self-Host It Or Build A Business On It. No Seats, No Lock-In.`}>
+    <Button href={os.repo} variant="solid" external>View On GitHub&nbsp; ↗</Button>
+  </SectionHeader>
+  <ul class="os__stats" role="list" data-stagger data-each=".08">
+    {os.highlights.map((h) => <li><strong>{h.value}</strong><span>{h.label}</span></li>)}
+  </ul>
+  <div class="os__row">
+    <div class="lic" data-reveal>
+      <div class="lic__head">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v18M5 21h14M7 7h10M7 7l-3 7a3 3 0 006 0zM17 7l-3 7a3 3 0 006 0z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <div><p class="lic__name">{os.license} License</p><p class="lic__sub">A short and simple permissive license</p></div>
+      </div>
+      <div class="lic__cols">
+        <div><p class="lic__t">Permissions</p><ul role="list">{perms.map((p) => <li class="ok">{p}</li>)}</ul></div>
+        <div><p class="lic__t">Conditions</p><ul role="list">{conds.map((p) => <li class="info">{p}</li>)}</ul></div>
+        <div><p class="lic__t">Limitations</p><ul role="list">{limits.map((p) => <li class="no">{p}</li>)}</ul></div>
+      </div>
+    </div>
+    <figure class="term" aria-label="Quickstart commands" data-code>
+      <div class="term__bar" aria-hidden="true"><span></span><span></span><span></span><em>quickstart</em></div>
+      <pre tabindex="0"><code>{os.quickstart.map((l) => <span class:list={['ln', l.startsWith('#') && 'ln--c']}>{l.startsWith('#') ? l : <><b>$</b> {l}</>}</span>)}</code></pre>
+    </figure>
+  </div>
+</section>
+<style>
+  .os__stats { margin-top: 56px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 20px; }
+  .os__stats li { background: var(--cream); padding: 26px 28px; display: grid; gap: 8px; transition: transform .6s cubic-bezier(.16,1,.3,1), background-color .4s; }
+  .os__stats li:hover { transform: translateY(-5px); background: var(--cream-2); }
+  .os__stats li:first-child { background: var(--brand); color: var(--white); }
+  .os__stats strong { font-family: var(--font-display); font-weight: 400; font-size: clamp(2.6rem, 4vw, 3.5rem); letter-spacing: -0.04em; line-height: 1.1; }
+  .os__stats span { font-size: var(--fs-small); color: var(--brand-ink); }
+  .os__stats li:first-child span { color: var(--on-brand-muted); }
+  .os__row { margin-top: 20px; display: grid; gap: 20px; }
+  .lic { border: 1.5px solid var(--line); padding: 28px; display: grid; gap: 24px; align-content: start; }
+  .lic__head { display: flex; gap: 14px; align-items: center; }
+  .lic__name { font-family: var(--font-display); font-size: 1.5rem; letter-spacing: var(--track-m); word-spacing: var(--words-m); }
+  .lic__sub { font-size: var(--fs-xs); color: var(--brand-ink); }
+  .lic__cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; }
+  .lic__t { font-weight: 500; font-size: var(--fs-small); margin-bottom: 10px; }
+  .lic li { display: flex; align-items: center; gap: 10px; font-size: var(--fs-small); padding: 4px 0; }
+  .lic li::before { content: ''; width: 12px; height: 12px; flex: none; }
+  .ok::before { background: var(--brand); clip-path: polygon(14% 52%, 38% 76%, 88% 22%, 100% 34%, 38% 96%, 0 62%); }
+  .info::before { border: 1.5px solid var(--brand); border-radius: 50%; }
+  .no::before { background: linear-gradient(45deg, transparent 44%, var(--brand) 44% 56%, transparent 56%), linear-gradient(-45deg, transparent 44%, var(--brand) 44% 56%, transparent 56%); }
+  .term { background: var(--ink-dark); color: #f3e3d8; min-width: 0; }
+  .term__bar { display: flex; gap: 6px; align-items: center; height: 38px; padding: 0 16px; background: #2b1408; font-size: var(--fs-xs); }
+  .term__bar span { width: 8px; height: 8px; background: #6b3a1e; } .term__bar span:nth-child(3) { background: #e07a3a; }
+  .term__bar em { font-style: normal; margin-left: 12px; color: #b87a56; }
+  pre { margin: 0; padding: 22px 20px; overflow-x: auto; font-family: var(--font-body); font-size: 0.84rem; line-height: 1.9; }
+  code { display: grid; }
+  .ln { white-space: pre; }
+  .ln b { color: #e07a3a; font-weight: 500; }
+  .ln--c { color: #b87a56; font-style: italic; }
+  @media (min-width: 1100px) { .os__row { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .os__stats li { padding-left: var(--card-x-m); padding-right: var(--card-x-m); } }   /* unified mobile card inset */
+</style>

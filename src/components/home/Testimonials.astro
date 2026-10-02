@@ -1,0 +1,13 @@
+---
+import SectionHeader from '../ui/SectionHeader.astro';
+import TestimonialCard from './TestimonialCard.astro';
+import { testimonials } from '../../data/home';
+---
+<section id="testimonials" class="section container" aria-labelledby="testimonials-title">
+  <SectionHeader id="testimonials-title" align="center" title={'What Our Clients\nSay About Us'} />
+  <div class="grid" data-stagger data-each=".08">{testimonials.map((t) => <TestimonialCard {...t} />)}</div>
+</section>
+<style>
+  .grid { margin-top: 70px; display: grid; gap: 19px 20px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+  @media (min-width: 1100px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+</style>

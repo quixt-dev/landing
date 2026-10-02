@@ -1,0 +1,49 @@
+---
+import { Picture } from 'astro:assets';
+// Photo: Ofspace LLC on Unsplash (photo-1681164315051), free under the Unsplash License. Swap for an in-house team shot any time.
+import team from '../../assets/images/team-developers.jpg';
+import CornerBrackets from '../ui/CornerBrackets.astro';
+---
+<div class="container media-wrap">
+  <figure class="media duotone" data-clip>
+    <Picture src={team} formats={['avif', 'webp']} widths={[640, 960, 1286, 1800]} sizes="(min-width: 1440px) 1286px, 100vw"
+      alt="A team of developers coding together on laptops around a studio table" loading="eager" fetchpriority="high" />
+    <CornerBrackets color="#fff" inset={24} size={46} weight={3} />
+    <a class="play" href="/projects/" aria-label="See our work" data-cursor="See Our Work">
+      <span class="play__ripple" aria-hidden="true"></span><span class="play__ripple" aria-hidden="true"></span><span class="play__ripple" aria-hidden="true"></span>
+      <span class="play__disc" aria-hidden="true"></span>
+      <svg class="play__icon" width="60" height="72" viewBox="0 0 60 72" aria-hidden="true" focusable="false"><path d="M0 0L60 36L0 72Z" fill="#fff" /></svg>
+    </a>
+    <figcaption class="visually-hidden">Developers collaborating on a product build.</figcaption>
+  </figure>
+</div>
+<style>
+  .media-wrap { padding-top: 19px; }
+  .media { position: relative; width: 100%; max-width: 100%; margin: 0; overflow: hidden; aspect-ratio: 1286 / 620; max-height: 88vh; max-height: 88svh; background: var(--cream-2); }
+  .media :global(picture), .media :global(img) { width: 100%; height: 100%; object-fit: cover; object-position: 50% 32%; }   /* keeps the two developers in front */
+  @media (max-width: 1024px) { .media { aspect-ratio: 16 / 9; } }
+  @media (max-width: 600px) { .media { aspect-ratio: 4 / 3; } }
+  @media (max-width: 760px) { .media :global(picture), .media :global(img) { object-position: 62% 30%; } }
+  /* play button: a true circle (square box, border-radius 50%) centred on the image, a frosted disc, an optically
+     centred triangle, and three thin rings that ripple out in sequence and dissolve, like a drop in still water */
+  .play { --d: clamp(84px, 9.2vw, 136px); position: absolute; z-index: 3; left: 50%; top: 50%; width: var(--d); height: var(--d); margin: calc(var(--d) / -2) 0 0 calc(var(--d) / -2);
+          display: grid; place-items: center; border-radius: 50%; }
+  .play__disc { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid rgb(255 255 255 / .62); background: rgb(255 255 255 / .08);
+                -webkit-backdrop-filter: blur(6px) saturate(1.1); backdrop-filter: blur(6px) saturate(1.1);
+                transition: transform .7s cubic-bezier(.16,1,.3,1), background-color .4s, border-color .4s; }
+  .play__icon { position: relative; width: 34%; height: auto; margin-left: 9%; transition: transform .7s cubic-bezier(.16,1,.3,1); }   /* optical centre of a triangle sits right of its box */
+  .play__ripple { position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgb(255 255 255 / .7); opacity: 0; pointer-events: none;
+                  animation: ripple 3.6s cubic-bezier(.22,.61,.36,1) infinite; }
+  .play__ripple:nth-child(2) { animation-delay: 1.2s; }
+  .play__ripple:nth-child(3) { animation-delay: 2.4s; }
+  @keyframes ripple {
+    0% { transform: scale(1); opacity: 0; }
+    8% { opacity: .75; }
+    100% { transform: scale(2.35); opacity: 0; }
+  }
+  .play:hover .play__disc { transform: scale(1.06); background: rgb(255 255 255 / .16); border-color: rgb(255 255 255 / .9); }
+  .play:hover .play__icon { transform: scale(1.08); }
+  .play:hover .play__ripple { animation-duration: 2.4s; }
+  .play:focus-visible { outline: 2px solid #fff; outline-offset: 6px; }
+  @media (prefers-reduced-motion: reduce) { .play__ripple { animation: none; opacity: 0; } }
+</style>

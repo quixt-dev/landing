@@ -1,0 +1,111 @@
+---
+/**
+ * "Book a free call" card. Renders a static month at build time; a small script
+ * re-renders the current month and wires date/time into the booking link.
+ */
+import { site } from '../../data/site';
+const now = new Date();
+const y = now.getFullYear(), m = now.getMonth();
+const first = (new Date(y, m, 1).getDay() + 6) % 7; // Monday-first
+const days = new Date(y, m + 1, 0).getDate();
+const monthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+const slots = ['10:00', '11:30', '15:00', '17:30'];
+---
+<section id="book-a-call" class="book on-brand" aria-labelledby="book-title">
+  <p class="eyebrow">Prefer To Talk?</p>
+  <h3 id="book-title" class="book__title">Book A Free<br />30-Min Call</h3>
+  <p class="book__lead">No Preparation Needed. Bring Your Idea. We’ll Bring The Questions.</p>
+  <div class="cal" data-cal data-booking={site.bookingUrl}>
+    <div class="cal__head"><p class="cal__month" data-month aria-live="polite">{monthName}</p>
+      <span class="cal__nav"><button type="button" data-prev aria-label="Previous month">‹</button><button type="button" data-next aria-label="Next month">›</button></span></div>
+    <div class="cal__grid" role="group" aria-label="Choose a date">
+      {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((d) => <span class="cal__dow" aria-hidden="true">{d}</span>)}
+      <div class="cal__days" data-days>
+        {Array.from({ length: first }).map(() => <span></span>)}
+        {Array.from({ length: days }, (_, i) => { const wd = (first + i) % 7; return <span class:list={['cal__d', wd > 4 && 'is-off']}>{i + 1}</span>; })}
+      </div>
+    </div>
+    <p class="cal__sel" data-sel>Pick A Weekday</p>
+    <div class="slots" role="radiogroup" aria-label="Choose a time">
+      {slots.map((s, i) => <label class="slot"><input type="radio" name="slot" value={s} checked={i === 2} /><span>{s}</span></label>)}
+    </div>
+    <p class="cal__tz">Times In IST · Shown In Your Timezone On Booking</p>
+    <a class="book__btn" href={site.bookingUrl} data-book data-fill target="_blank" rel="noopener">Book A Call <span aria-hidden="true">→</span></a>
+  </div>
+</section>
+<script>
+  const cal = document.querySelector<HTMLElement>('[data-cal]');
+  if (cal) {
+    const base = cal.dataset.booking!;
+    const daysEl = cal.querySelector<HTMLElement>('[data-days]')!, monthEl = cal.querySelector('[data-month]')!, selEl = cal.querySelector('[data-sel]')!, btn = cal.querySelector<HTMLAnchorElement>('[data-book]')!;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    let view = new Date(today.getFullYear(), today.getMonth(), 1);
+    let picked: Date | null = null;
+    const fmt = (d: Date) => d.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long' });
+    const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const slot = () => cal.querySelector<HTMLInputElement>('input[name="slot"]:checked')?.value ?? '';
+    const sync = () => {
+      selEl.textContent = picked ? fmt(picked) : 'Pick A Weekday';
+      btn.href = picked ? `${base}?date=${iso(picked)}&time=${encodeURIComponent(slot())}` : base;
+      btn.innerHTML = picked ? `Book ${picked.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })} · ${slot()} <span aria-hidden="true">→</span>` : 'Book A Call <span aria-hidden="true">→</span>';
+    };
+    const render = () => {
+      monthEl.textContent = view.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      const lead = (view.getDay() + 6) % 7, n = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
+      daysEl.innerHTML = '';
+      for (let i = 0; i < lead; i++) daysEl.append(document.createElement('span'));
+      for (let d = 1; d <= n; d++) {
+        const date = new Date(view.getFullYear(), view.getMonth(), d), wd = (date.getDay() + 6) % 7;
+        const b = document.createElement('button'); b.type = 'button'; b.textContent = String(d); b.className = 'cal__d';
+        const off = wd > 4 || date <= today;
+        if (off) { b.disabled = true; b.classList.add('is-off'); }
+        if (picked && +picked === +date) { b.classList.add('is-sel'); b.setAttribute('aria-pressed', 'true'); }
+        b.setAttribute('aria-label', fmt(date) + (off ? ' (unavailable)' : ''));
+        b.addEventListener('click', () => { picked = date; render(); sync(); });
+        b.style.setProperty('--i', String(lead + d)); daysEl.append(b);
+      }
+    };
+    // Pre-select the next available weekday
+    const next = new Date(today); do { next.setDate(next.getDate() + 1); } while ([0, 6].includes(next.getDay()));
+    picked = next; view = new Date(next.getFullYear(), next.getMonth(), 1);
+    cal.querySelector('[data-prev]')!.addEventListener('click', () => { const p = new Date(view.getFullYear(), view.getMonth() - 1, 1); if (p >= new Date(today.getFullYear(), today.getMonth(), 1)) { view = p; render(); } });
+    cal.querySelector('[data-next]')!.addEventListener('click', () => { view = new Date(view.getFullYear(), view.getMonth() + 1, 1); render(); });
+    cal.addEventListener('change', sync);
+    render(); sync();
+  }
+</script>
+<style>
+  .book { background: var(--brand); padding: 32px; display: grid; gap: 10px; }
+  .eyebrow { font-size: 0.8125rem; }
+  .book__title { font-size: 2rem; line-height: 1.22; letter-spacing: var(--track-l); word-spacing: var(--words-l); }
+  .book__lead { font-size: 0.875rem; line-height: 1.57; color: var(--on-brand-muted); margin-bottom: 18px; }
+  .cal__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .cal__month { font-weight: 500; }
+  .cal__nav { display: flex; gap: 4px; }
+  .cal__nav button { width: 32px; height: 32px; font-size: 1.1rem; color: var(--white); }
+  .cal__nav button:hover { background: rgb(255 255 255 / .12); }
+  .cal__grid { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 6px; }
+  .cal__dow { text-align: center; font-size: 0.7rem; color: var(--on-brand-muted); padding-bottom: 8px; }
+  .cal__days { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .cal__days :global(.cal__d) { animation: day-in .6s cubic-bezier(.16,1,.3,1) both; animation-delay: calc(var(--i, 0) * 12ms); transition: background-color .3s, color .3s, transform .4s cubic-bezier(.34,1.56,.64,1); height: 38px; display: grid; place-items: center; background: rgb(255 255 255 / .08); color: var(--white); font-size: 0.8125rem; }
+  .cal__days :global(button.cal__d:hover) { background: rgb(255 255 255 / .2); }
+  .cal__days :global(.cal__d.is-off) { background: none; color: rgb(255 255 255 / .45); cursor: default; }
+  .cal__days :global(button.cal__d:active) { transform: scale(.9); }
+  @keyframes day-in { from { opacity: 0; transform: translateY(8px) scale(.9); } }
+  @media (prefers-reduced-motion: reduce) { .cal__days :global(.cal__d) { animation: none; } }
+  .cal__days :global(.cal__d.is-sel) { transform: scale(1.06); box-shadow: 0 0 0 4px rgb(255 255 255 / .18); background: var(--white); color: var(--brand); font-weight: 500; }
+  .cal__sel { margin: 20px 0 10px; font-weight: 500; font-size: 0.8125rem; }
+  .slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .slot input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .slot span { transition: background-color .35s, color .3s, transform .45s cubic-bezier(.34,1.56,.64,1); display: block; text-align: center; padding: 11px 0; border: 1.2px solid rgb(255 255 255 / .35); background: rgb(255 255 255 / .08); font-weight: 500; font-size: 0.84rem; cursor: pointer; }
+  .slot:hover span { transform: translateY(-3px); }
+  .slot:has(input:checked) span { background: var(--white); color: var(--brand); border-color: var(--white); }
+  .slot:has(input:focus-visible) span { outline: 2px solid var(--white); outline-offset: 2px; }
+  .cal__tz { margin-top: 10px; font-size: 0.72rem; color: var(--on-brand-muted); }
+  .book__btn { position: relative; overflow: hidden; isolation: isolate; margin-top: 22px; display: flex; justify-content: center; gap: 10px; padding: 16px; background: var(--white); color: var(--brand); font-weight: 500; font-size: 0.906rem; }
+  .book__btn::before { content: ''; position: absolute; inset: -1px; z-index: -1; background: var(--cream-2); clip-path: circle(0% at var(--fx, 50%) var(--fy, 100%)); transition: clip-path .7s cubic-bezier(.16,1,.3,1); }
+  .book__btn:hover::before, .book__btn:focus-visible::before { clip-path: circle(150% at var(--fx, 50%) var(--fy, 100%)); }
+  .book__btn span { display: inline-block; transition: transform .5s cubic-bezier(.16,1,.3,1); }
+  .book__btn:hover span { transform: translateX(5px); }
+  @media (max-width: 600px) { .book { padding-left: var(--card-x-m); padding-right: var(--card-x-m); } }   /* unified mobile card inset */
+</style>

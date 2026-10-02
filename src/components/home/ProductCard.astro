@@ -1,0 +1,31 @@
+---
+import { graphicSrc } from '../../lib/graphics/registry';
+import type { Project } from '../../data/projects';
+import Lines from '../ui/Lines.astro';
+export interface Props { project: Project; headingLevel?: 'h2' | 'h3' }
+const { project, headingLevel = 'h3' } = Astro.props;
+const H = headingLevel;
+const href = `/projects/${project.slug}/`;
+---
+<article class="product" id={project.slug} data-cursor="Read Case Study">
+  <div class="product__frame" data-spot><img class="product__art" data-inline-art="card" src={graphicSrc(`product-${project.slug}`)} width="524" height="264" alt="" loading="lazy" decoding="async" /></div>
+  <div class="product__meta">
+    <H class="product__name"><a href={href}><span class="product__label">{project.name}</span></a></H>
+    <p class="product__cat"><Lines text={project.categoryShort} /></p>
+  </div>
+</article>
+<style>
+  .product { position: relative; display: grid; gap: 18px; }
+  .product__frame { overflow: hidden; background: var(--cream); }
+  .product__art { width: 100%; height: auto; aspect-ratio: 524 / 264; transition: transform 1.1s cubic-bezier(.16,1,.3,1), filter .5s; }
+  .product:hover .product__art { transform: scale(1.06); filter: saturate(1.15); }
+  /* transform lives on the inner span: a transformed ancestor would trap the full-card a::after link overlay */
+  .product__label { display: inline-block; transition: transform .6s cubic-bezier(.16,1,.3,1); }
+  .product:hover .product__label { transform: translateX(8px); }
+  .product__meta { display: flex; justify-content: space-between; align-items: start; gap: 16px; padding: 0 13px; }
+  .product__name { font-size: clamp(1.6rem, 2.4vw, 2.1875rem); letter-spacing: var(--track-l); word-spacing: var(--words-l); line-height: 1.2; }
+  .product__name a::after { content: ''; position: absolute; inset: 0; }
+  .product__name a:focus-visible { outline: none; }
+  .product:has(a:focus-visible) { outline: 2px solid var(--brand); outline-offset: 4px; }
+  .product__cat { text-align: right; font-size: 0.8125rem; line-height: 1.7; color: var(--brand-ink); }
+</style>

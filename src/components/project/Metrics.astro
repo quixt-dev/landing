@@ -1,0 +1,41 @@
+---
+import SectionHeader from '../ui/SectionHeader.astro';
+import { pad2 } from '../../lib/text';
+const { metrics } = Astro.props as { metrics: { value: string; label: string; note: string }[] };
+const spark = (i: number, light: boolean) => [0, 1, 2, 3, 4, 5, 6].map((k) => { const h = 6 + ((k * 37 + i * 11) % 16); return `<rect x="${k * 9}" y="${22 - h}" width="4" height="${h}" fill="${light ? '#fff' : '#AB4200'}" fill-opacity="${(0.35 + k * 0.09).toFixed(2)}"/>`; }).join('');
+---
+<section class="section container" aria-labelledby="impact-title">
+  <SectionHeader id="impact-title" eyebrow="01 · By The Numbers" title={'The Build,\nBy The Numbers'} lead="Counted Straight From The Codebase And Git History. No Vanity Metrics, No Projections." />
+  <ul class="metrics" role="list" data-stagger data-each=".1">
+    {metrics.map((m, i) => (
+      <li class:list={['metric', i === 0 && 'metric--hot']}>
+        <span class="metric__i" aria-hidden="true">/{pad2(i + 1)}</span>
+        <svg class="metric__spark" width="60" height="22" viewBox="0 0 60 22" aria-hidden="true" set:html={spark(i, i === 0)} />
+        <p class="metric__v" data-count>{m.value}</p>
+        <p class="metric__l">{m.label}</p>
+        <p class="metric__n">{m.note}</p>
+      </li>
+    ))}
+  </ul>
+</section>
+<style>
+  .metrics { margin-top: 56px; display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+  .metric { position: relative; background: var(--cream); padding: 26px 28px 30px; min-height: 270px; display: grid; grid-template-rows: auto 1fr auto auto; }
+  .metric--hot { background: var(--brand); color: var(--white); }
+  .metric__i { font-size: var(--fs-xs); color: var(--brand-ink); }
+  .metric--hot .metric__i, .metric--hot .metric__n { color: var(--on-brand-muted); }
+  .metric { transition: transform .7s cubic-bezier(.16,1,.3,1), background-color .5s; }
+  .metric:hover { transform: translateY(-6px); }
+  .metric:not(.metric--hot):hover { background: var(--cream-2); }
+  .metric__spark { position: absolute; top: 24px; right: 28px; }
+  .metric__spark :global(rect) { transform-box: fill-box; transform-origin: 50% 100%; transition: transform .6s cubic-bezier(.16,1,.3,1); }
+  .metric:hover .metric__spark :global(rect) { animation: bars 1s cubic-bezier(.16,1,.3,1) both; }
+  .metric:hover .metric__spark :global(rect:nth-child(2)) { animation-delay: .04s; } .metric:hover .metric__spark :global(rect:nth-child(3)) { animation-delay: .08s; }
+  .metric:hover .metric__spark :global(rect:nth-child(4)) { animation-delay: .12s; } .metric:hover .metric__spark :global(rect:nth-child(5)) { animation-delay: .16s; }
+  .metric:hover .metric__spark :global(rect:nth-child(6)) { animation-delay: .2s; } .metric:hover .metric__spark :global(rect:nth-child(7)) { animation-delay: .24s; }
+  @keyframes bars { 0% { transform: scaleY(1); } 40% { transform: scaleY(.2); } 100% { transform: scaleY(1); } }
+  .metric__v { font-family: var(--font-display); font-size: clamp(3rem, 5.2vw, 4.75rem); line-height: 1.1; letter-spacing: -0.05em; align-self: end; margin-bottom: 14px; }
+  .metric__l { font-weight: 500; font-size: 1.0625rem; }
+  .metric__n { font-size: var(--fs-small); color: var(--brand-ink); margin-top: 6px; }
+  @media (max-width: 600px) { .metric { padding-left: var(--card-x-m); padding-right: var(--card-x-m); } }   /* unified mobile card inset */
+</style>

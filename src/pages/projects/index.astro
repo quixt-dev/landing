@@ -1,0 +1,52 @@
+---
+import { graphicSrc } from '../../lib/graphics/registry';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SectionHeader from '../../components/ui/SectionHeader.astro';
+import Breadcrumbs from '../../components/ui/Breadcrumbs.astro';
+import Button from '../../components/ui/Button.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import { projects } from '../../data/projects';
+import { graph, organization, website, webPage, breadcrumbs, abs } from '../../lib/schema';
+
+const path = '/projects/';
+const title = 'Projects & Case Studies, Apps And SaaS We’ve Built';
+const description = 'Quixt case studies: Tessa (AI marketing), NandyAI (society management), Flowgentic (multi-agent AI) and the Infinify studio site.';
+const jsonLd = graph(
+  organization(), website(),
+  webPage({ path, title, description, type: 'CollectionPage', breadcrumbs: true }),
+  breadcrumbs(path, [{ name: 'Home', path: '/' }, { name: 'Projects', path }]),
+  { '@type': 'ItemList', '@id': `${abs(path)}#list`, itemListElement: projects.map((p, i) => ({ '@type': 'ListItem', position: i + 1, name: p.name, description: p.summary, url: abs(`/projects/${p.slug}/`) })) },
+);
+---
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+  <section class="container list-hero">
+    <Breadcrumbs items={[{ name: 'Home', href: '/' }, { name: 'Projects' }]} />
+    <SectionHeader level="h1" eyebrow="Selected Work" title={'Products\nWe’re Proud Of'} lead="We Partner With Startups And Growing Companies To Build Reliable, Scalable, And User-Focused Digital Products." />
+  </section>
+  <section class="container list" aria-label="All projects">
+    {projects.map((p, i) => (
+      <article class:list={['proj', i % 2 && 'proj--alt']} id={p.slug}>
+        <img data-inline-art="card" src={graphicSrc(`product-${p.slug}`)} width="524" height="264" alt="" loading={i < 2 ? 'eager' : 'lazy'} decoding="async" />
+        <div class="proj__copy">
+          <p class="eyebrow">{p.category} · {p.year}</p>
+          <h2 class="proj__name">{p.name}</h2>
+          <p class="lead">{p.summary}</p>
+          <p class="role">{p.caseStudy.role}</p>
+          <Button href={`/projects/${p.slug}/`} variant="solid">Read The Case Study &nbsp;→</Button>
+        </div>
+      </article>
+    ))}
+  </section>
+  <CtaBand />
+</BaseLayout>
+<style>
+  .list-hero { padding-top: clamp(40px, 4.2vw, 60px); display: grid; gap: 48px; }
+  .list { margin-top: 72px; display: grid; gap: 20px; }
+  .proj { display: grid; gap: 24px; background: var(--cream); padding: 20px; align-items: center; }
+  .proj img { width: 100%; height: auto; }
+  .proj__copy { display: grid; gap: 14px; justify-items: start; padding: 12px; }
+  .proj__name { font-size: clamp(2.5rem, 5vw, 4.5rem); letter-spacing: var(--track-xl); word-spacing: var(--words-xl); line-height: 1.1; }
+  .role { font-size: var(--fs-small); color: var(--brand-ink); }
+  .soon { font-weight: 500; font-size: var(--fs-small); padding: 12px 16px; border: 1.5px dashed var(--line); }
+  @media (min-width: 1000px) { .proj { grid-template-columns: 524px 1fr; gap: 48px; } .proj--alt { grid-template-columns: 1fr 524px; } .proj--alt img { order: 2; } }
+</style>

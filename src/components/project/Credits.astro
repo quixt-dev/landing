@@ -1,0 +1,17 @@
+---
+const { text } = Astro.props as { text: string };
+---
+<aside class="container credits" aria-label="Open-source credits" data-reveal>
+  <div class="credits__box">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><path d="M14 3l3.3 6.8 7.5 1.1-5.4 5.3 1.3 7.4L14 20.1l-6.7 3.5 1.3-7.4-5.4-5.3 7.5-1.1z" stroke="#AB4200" stroke-width="1.5"/></svg>
+    <p><strong>Open-Source Credits</strong>{text}</p>
+  </div>
+</aside>
+<style>
+  .credits { margin-top: 40px; }
+  .credits__box { display: flex; gap: 18px; align-items: flex-start; padding: 24px 28px; border: 1.5px dashed var(--line); background: var(--cream); }
+  .credits__box svg { flex: none; margin-top: 2px; }
+  p { font-size: var(--fs-small); line-height: 1.6; color: var(--brand-ink); }
+  strong { display: block; color: var(--brand); font-size: var(--fs-body); margin-bottom: 4px; }
+  @media (max-width: 600px) { .credits__box { padding-left: var(--card-x-m); padding-right: var(--card-x-m); } }   /* unified mobile card inset */
+</style>

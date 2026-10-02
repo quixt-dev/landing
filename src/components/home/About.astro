@@ -1,0 +1,78 @@
+---
+import { graphicSrc } from '../../lib/graphics/registry';
+import { about } from '../../data/home';
+import { richText } from '../../lib/text';
+import { orbit, orbitPositions } from '../../lib/graphics/inline';
+import Avatar from '../ui/Avatar.astro';
+const orbitSvg = orbit();
+// Convert the designed avatar positions into polar coordinates so each can orbit its ring.
+// Each avatar sits exactly ON a ring: its distance snaps to the nearest ring radius (52 / 84 / 115, see orbit()).
+const RINGS = [52, 84, 115];
+const orbits = orbitPositions.map(([x, y]) => {
+  const dx = x - 169, dy = y - 148, raw = Math.hypot(dx, dy);
+  const dist = RINGS.reduce((best, r) => (Math.abs(r - raw) < Math.abs(best - raw) ? r : best), RINGS[0]);
+  return { r: +((dist / 338) * 100).toFixed(2), a: +((Math.atan2(dy, dx) * 180) / Math.PI).toFixed(1), dur: dist > 100 ? 70 : dist > 70 ? 52 : dist > 40 ? 38 : 26, dir: dist > 100 || (dist > 40 && dist < 70) ? 1 : -1 };
+});
+---
+<section id="about" class="about container" aria-labelledby="about-title">
+  <h2 id="about-title" class="visually-hidden">About Quixt</h2>
+  <div class="about__grid" data-stagger="load" data-delay=".75" data-each=".14">
+    {about.map((card) => (
+      <article class="card on-brand">
+        <div class="card__art" aria-hidden="true">
+          {card.graphic === 'globe' ? (
+            <div class="globe" data-globe-wrap>
+              <img src={graphicSrc('dot-globe')} width="240" height="240" alt="" loading="eager" decoding="async" class="globe__fallback" />
+              <canvas class="globe__canvas" data-globe="dot" width="240" height="240"></canvas>
+            </div>
+          ) : (
+            <div class="orbit">
+              <svg viewBox="0 0 338 295" width="338" height="295" fill="none" set:html={orbitSvg} />
+              {orbits.map((o, i) => (
+                <span class="orbit__dot" style={`--r:${o.r};--a:${o.a}deg;--dur:${o.dur}s;--dir:${o.dir}`}><Avatar index={i + 1} size={22} shape="circle" ring /></span>
+              ))}
+            </div>
+          )}
+        </div>
+        <p class="card__text" set:html={richText(card.text)} />
+      </article>
+    ))}
+  </div>
+</section>
+<script>import '../../scripts/globes';</script>
+<style>
+  .about { padding-top: clamp(48px, 5.3vw, 76px); }
+  .about__grid { display: grid; gap: 22px; }
+  .card { background: var(--brand); display: grid; grid-template-columns: 1fr; align-items: center; gap: 12px; padding: 28px 24px; min-height: 295px; overflow: hidden; }
+  .card__art { display: grid; place-items: center; }
+  .globe { position: relative; width: 240px; height: 240px; }
+  .globe__fallback, .globe__canvas { position: absolute; inset: 0; width: 100%; height: 100%; transition: opacity .8s; }
+  .globe__canvas { opacity: 0; }
+  .globe:global(.is-live) .globe__canvas { opacity: 1; }
+  .globe:global(.is-live) .globe__fallback { opacity: 0; }
+  .orbit { position: relative; width: 338px; max-width: 100%; aspect-ratio: 338 / 295; container-type: inline-size; }
+  .orbit svg { width: 100%; height: 100%; }
+  .orbit :global(.orbit-sweep) { transform-box: view-box; transform-origin: 169px 148px; animation: spin 7s linear infinite; }
+  .orbit :global(.orbit-core) { transform-box: view-box; transform-origin: 169px 148px; animation: spin 14s linear infinite reverse; }
+  .orbit__dot { position: absolute; left: 50%; top: 50.17%; width: 22px; height: 22px; margin: -11px 0 0 -11px; line-height: 0;
+    transform: rotate(calc(var(--a) + var(--spin) * var(--dir))) translateX(calc(var(--r) * 1cqw)) rotate(calc(-1 * (var(--a) + var(--spin) * var(--dir))));
+    animation: orbit var(--dur) linear infinite; }
+  .orbit__dot :global(.avatar) { transition: transform .4s cubic-bezier(.16,1,.3,1); }
+  .card:hover .orbit__dot :global(.avatar) { transform: scale(1.25); }
+  @property --spin { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+  @keyframes orbit { to { --spin: 360deg; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .orbit__dot, .orbit :global(.orbit-sweep), .orbit :global(.orbit-core) { animation: none; } }
+  .card__text { font-size: var(--fs-lead); line-height: 1.53; color: var(--on-brand-muted); max-width: 16rem; justify-self: center; }
+  .card__text :global(strong) { color: var(--white); font-weight: 500; }
+  @media (max-width: 559.98px) { .card__text { text-align: center; } }
+  @media (min-width: 560px) {
+    .card { grid-template-columns: 1fr 1fr; padding: 0 24px 0 0; }
+  }
+  @media (min-width: 900px) {
+    .about__grid { grid-template-columns: 1fr 1fr; }
+    .card { grid-template-columns: 336px 1fr; padding: 0; }
+    .card__text { justify-self: start; padding-right: 28px; }
+  }
+  @media (max-width: 600px) { .card { padding-left: var(--card-x-m); padding-right: var(--card-x-m); } }   /* unified mobile card inset */
+</style>

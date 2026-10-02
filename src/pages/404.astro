@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/ui/Button.astro';
+---
+<BaseLayout title="Page Not Found" description="The page you’re looking for doesn’t exist. Explore Quixt’s work or get in touch." noindex>
+  <section class="container nf">
+    <p class="eyebrow">Error 404</p>
+    <h1 class="h1">This Page Took<br />A Wrong Turn.</h1>
+    <p class="lead">The Link May Be Broken Or The Page May Have Moved.</p>
+    <div class="btns"><Button href="/" variant="solid">Back To Home</Button><Button href="/projects/">See Our Work</Button><Button href="/contact/">Contact Us</Button></div>
+  </section>
+</BaseLayout>
+<style>
+  .nf { padding-block: clamp(80px, 12vw, 180px) 40px; display: grid; gap: 22px; justify-items: start; }
+  .btns { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+</style>

@@ -1,0 +1,15 @@
+---
+import Button from './Button.astro';
+import Lines from './Lines.astro';
+const { title = 'Have A Product\nIn Mind?', lead = 'Tell Us What You’re Building. We’ll Reply Within One Business Day With A Scoped Plan.' } = Astro.props as { title?: string; lead?: string };
+---
+<section class="section container cta" aria-labelledby="cta-title">
+  <h2 id="cta-title" class="h2" data-split><Lines text={title} /></h2>
+  <p class="lead" data-reveal data-delay=".15">{lead}</p>
+  <div class="cta__btns" data-stagger><Button href="/contact/" variant="solid">Start A Project</Button><Button href="/contact/#book-a-call">Book A Call</Button></div>
+</section>
+<style>
+  .cta { display: grid; justify-items: center; text-align: center; gap: 24px; }
+  .cta .lead { max-width: 35rem; }
+  .cta__btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+</style>

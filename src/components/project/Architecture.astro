@@ -1,0 +1,64 @@
+---
+import { architecture } from '../../lib/graphics/architecture';
+import CornerBrackets from '../ui/CornerBrackets.astro';
+import Lines from '../ui/Lines.astro';
+import type { CaseStudy } from '../../data/projects';
+const { arch, name } = Astro.props as { arch: CaseStudy['architecture']; name: string };
+const d = architecture(arch);
+---
+<section id="architecture" class="section container" aria-labelledby="arch-title">
+  <div class="panel on-brand dot-grid">
+    <CornerBrackets color="#fff" inset={24} size={36} />
+    <header class="head">
+      <div class="head__main">
+        <p class="eyebrow" data-scramble>04 · Architecture</p>
+        <h2 id="arch-title" class="h2" data-split><Lines text={arch.title} /></h2>
+      </div>
+      <p class="lead" data-reveal data-delay=".2">{arch.summary}</p>
+    </header>
+    <figure class="diagram">
+      <div class="scroll-x" tabindex="0" role="region" aria-label="Architecture diagram (scroll horizontally on small screens)">
+        <svg viewBox={`0 0 ${d.width} ${d.height}`} width={d.width} height={d.height} fill="none" data-draw role="img" aria-labelledby="arch-svg-title" set:html={`<title id="arch-svg-title">${name} system architecture</title>${d.svg}`} />
+      </div>
+      <figcaption>
+        <ul class="legend" role="list">
+          <li><span class="lg lg--solid" aria-hidden="true"></span>Sync · REST / GraphQL</li>
+          <li><span class="lg lg--dash" aria-hidden="true"></span>Async · Kafka Events</li>
+          <li><span class="lg lg--node" aria-hidden="true"></span>Service Node</li>
+        </ul>
+        <p class="stats">{arch.stats}</p>
+      </figcaption>
+    </figure>
+    <details class="text-alt">
+      <summary>Read The Architecture As Text</summary>
+      <dl>{arch.columns.map((c) => (<div><dt>{c.label}</dt><dd>{c.nodes.map((n) => `${n.title} (${n.sub})`).join(', ')}</dd></div>))}</dl>
+    </details>
+  </div>
+</section>
+<style>
+  .panel { position: relative; background-color: var(--brand); padding: clamp(40px, 5.6vw, 80px) clamp(20px, 5vw, 72px) clamp(40px, 5vw, 64px); }
+  .head { display: grid; gap: 24px; }
+  .head__main { display: grid; gap: 14px; }
+  .head .lead { max-width: 30rem; }
+  .diagram { margin-top: clamp(40px, 5vw, 70px); }
+  .diagram svg { width: 100%; min-width: 860px; height: auto; }
+  .diagram :global(.arch-async) { animation: flow 1.2s linear infinite; }
+  .diagram :global([data-node] > *) { transition: opacity .3s; }
+  .diagram svg:hover :global([data-node] > *) { opacity: .55; }
+  .diagram svg :global([data-node]:hover > *) { opacity: 1; }
+  @keyframes flow { to { stroke-dashoffset: -18; } }
+  @media (prefers-reduced-motion: reduce) { .diagram :global(.arch-async) { animation: none; } .diagram :global(.packet) { display: none; } }
+  figcaption { margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--line-on-brand); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; font-size: var(--fs-xs); }
+  .legend { display: flex; flex-wrap: wrap; gap: 12px 40px; color: var(--on-brand-muted); }
+  .legend li { display: inline-flex; align-items: center; gap: 12px; }
+  .lg { display: inline-block; width: 36px; border-top: 1.5px solid #fff; }
+  .lg--dash { border-top-style: dashed; }
+  .lg--node { width: 8px; height: 8px; background: #fff; border: 0; }
+  .stats { font-weight: 500; }
+  .text-alt { margin-top: 24px; font-size: var(--fs-small); color: var(--on-brand-muted); }
+  .text-alt summary { cursor: pointer; font-weight: 500; color: var(--white); }
+  .text-alt dl { margin-top: 14px; display: grid; gap: 8px; }
+  .text-alt dt { font-weight: 500; color: var(--white); }
+  @media (min-width: 1000px) { .head { grid-template-columns: 1fr minmax(0, 27rem); } .head__main { grid-column: 1 / -1; grid-row: 1; } .head .lead { grid-column: 2; grid-row: 1; align-self: end; justify-self: end; margin-bottom: 6px; } }
+  @media (max-width: 600px) { .panel { padding-left: var(--card-x-m); padding-right: var(--card-x-m); } }   /* unified mobile card inset */
+</style>

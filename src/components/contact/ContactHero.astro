@@ -1,0 +1,75 @@
+---
+import { graphicSrc } from '../../lib/graphics/registry';
+import Lines from '../ui/Lines.astro';
+import Avatar from '../ui/Avatar.astro';
+import { contactHero } from '../../data/contact';
+import { site } from '../../data/site';
+---
+<section class="chero container" aria-labelledby="contact-title">
+  <div class="chero__copy">
+    <p class="eyebrow" data-scramble="load">{contactHero.eyebrow}</p>
+    <h1 id="contact-title" class="chero__title" data-split="load" data-delay=".1"><Lines text={contactHero.title} /></h1>
+    <p class="lead" data-reveal="load" data-delay=".5">{contactHero.lead}</p>
+    <ul class="chips" role="list" data-stagger="load" data-delay=".7" data-each=".08">{contactHero.reassurance.map((c) => <li><span aria-hidden="true"></span>{c}</li>)}</ul>
+    <div class="proof" data-reveal="load" data-delay=".95">
+      <span class="stack" aria-hidden="true">{[1, 2, 5].map((i) => <Avatar index={i} size={40} ring />)}</span>
+      <p><strong>{site.stats.foundersHelped} First-Time Founders Helped</strong><span>Most Of Our Clients Had No Technical Background.</span></p>
+    </div>
+  </div>
+  <div class="card on-brand dot-grid" data-reveal="load" data-delay=".3" data-globe-wrap>
+    <img class="card__fallback" src={graphicSrc('client-globe')} width="580" height="540" alt={`Globe connecting ${site.name}'s ${site.address.locality} HQ to clients in ${site.stats.countries} countries`} loading="eager" decoding="async" />
+    <canvas class="card__canvas" data-globe="client" width="580" height="540" aria-hidden="true"></canvas>
+    <p class="hint" aria-hidden="true">Drag To Spin</p>
+    <p class="status"><span aria-hidden="true"></span>{contactHero.availability}</p>
+    <p class="clock"><time data-ist-clock>Guwahati · IST</time></p>
+    <p class="corner corner--l"><span>HQ</span>{site.address.locality}, {site.address.countryName}</p>
+    <p class="corner corner--r"><span>Clients In</span>{site.stats.countries} Countries</p>
+  </div>
+</section>
+<script>
+  import '../../scripts/globes';
+  const el = document.querySelector<HTMLTimeElement>('[data-ist-clock]');
+  if (el) {
+    const tick = () => { const now = new Date(); el.textContent = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Kolkata' }).format(now) + ' IST'; el.dateTime = now.toISOString(); };
+    tick(); setInterval(tick, 30_000);
+  }
+</script>
+<style>
+  .chero { padding-top: clamp(48px, 5vw, 72px); display: grid; gap: 40px; }
+  .chero__copy { display: grid; gap: 22px; align-content: end; justify-items: start; }
+  .chero__title { font-size: var(--fs-h1-xl); line-height: 1.18; letter-spacing: var(--track-xl); word-spacing: var(--words-xl); }
+  .chero .lead { max-width: 37.5rem; margin-top: 4px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+  .chips li { display: inline-flex; align-items: center; gap: 9px; padding: 9px 13px; border: 1.5px solid var(--line); font-weight: 500; font-size: 0.8125rem; }
+  .chips li span { width: 7px; height: 7px; background: var(--brand); }
+  .proof { display: flex; align-items: center; gap: 16px; margin-top: 18px; }
+  .stack { display: flex; }
+  .stack :global(.avatar + .avatar) { margin-left: -10px; }
+  .proof strong { display: block; font-size: var(--fs-body); }
+  .proof span { font-size: 0.8125rem; color: var(--brand-ink); }
+  .card { position: relative; background: var(--brand); aspect-ratio: 580 / 540; overflow: hidden; font-size: var(--fs-xs); }
+  .card img, .card canvas { position: absolute; inset: 0; width: 100%; height: 100%; transition: opacity 1s; }
+  .card canvas { opacity: 0; cursor: grab; }
+  .card canvas:global(.is-dragging) { cursor: grabbing; }
+  .card:global(.is-live) canvas { opacity: 1; }
+  .card:global(.is-live) .card__fallback { opacity: 0; }
+  .hint { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); font-size: 0.68rem; letter-spacing: .08em; color: var(--on-brand-muted); opacity: 0; transition: opacity .6s; pointer-events: none; }
+  .card:global(.is-live):hover .hint { opacity: 1; }
+  .status span { animation: live 1.8s ease-in-out infinite; }
+  @keyframes live { 50% { opacity: .25; transform: scale(.6); } }
+  .chips li { transition: background-color .35s, color .35s, transform .45s cubic-bezier(.16,1,.3,1); }
+  .chips li:hover { background: var(--brand); color: var(--white); transform: translateY(-3px); }
+  .chips li:hover span { background: var(--white); }
+  .stack :global(.avatar) { transition: transform .5s cubic-bezier(.16,1,.3,1); }
+  .proof:hover .stack :global(.avatar:nth-child(1)) { transform: translateX(-6px); }
+  .proof:hover .stack :global(.avatar:nth-child(3)) { transform: translateX(6px); }
+  @media (prefers-reduced-motion: reduce) { .status span { animation: none; } }
+  .status { position: absolute; top: 24px; left: 24px; display: inline-flex; gap: 9px; align-items: center; padding: 8px 12px; background: rgb(255 255 255 / .12); border: 1px solid rgb(255 255 255 / .35); font-weight: 500; }
+  .status span { width: 7px; height: 7px; background: var(--white); }
+  .clock { position: absolute; top: 32px; right: 24px; font-weight: 500; }
+  .corner { position: absolute; bottom: 22px; font-family: var(--font-display); font-size: 1.0625rem; display: grid; }
+  .corner span { font-family: var(--font-body); font-size: 0.72rem; color: var(--on-brand-muted); }
+  .corner--l { left: 24px; } .corner--r { right: 24px; text-align: right; }
+  @media (max-width: 560px) { .card { aspect-ratio: 1 / 1.08; } .card img { top: 6%; height: auto; } .clock { display: none; } .status { left: 16px; right: 16px; top: 16px; font-size: 0.7rem; } .corner { font-size: 0.875rem; bottom: 16px; } .corner--l { left: 16px; } .corner--r { right: 16px; } }
+  @media (min-width: 1000px) { .chero { grid-template-columns: 1fr 580px; align-items: end; } }
+</style>

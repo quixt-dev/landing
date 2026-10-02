@@ -1,0 +1,210 @@
+---
+/**
+ * Four-step project brief. Works as a plain HTML form (all steps visible, native
+ * inputs); JS only updates the progress indicator and pre-fills the plan from ?plan=.
+ */
+import Icon from '../ui/Icon.astro';
+import { buildIcons } from '../../lib/graphics/icons';
+import { buildOptions, stages, prompts, budgets, timelines, contactMethods } from '../../data/contact';
+import { site } from '../../data/site';
+import { pad2 } from '../../lib/text';
+const steps = ['Your Idea', 'Where You Are', 'The Details', 'Budget & Contact'];
+---
+<form class="brief" data-reveal action={site.formAction} method="post" enctype="multipart/form-data" data-brief aria-labelledby="brief-title">
+  <h3 id="brief-title" class="visually-hidden">Project Brief Form</h3>
+  <div class="progress" aria-live="polite">
+    <p class="progress__label"><strong data-step-label>Step 1 Of 4 · {steps[0]}</strong><span>≈ 2 Min · No Commitment</span></p>
+    <div class="progress__bar" aria-hidden="true">{steps.map((_, i) => <span data-seg={i} class:list={[i === 0 && 'on']}></span>)}</div>
+  </div>
+  <input type="hidden" name="plan" value="" data-plan />
+  <input type="hidden" name="_subject" value="New Project Brief · quixt.dev" />
+  <div class="hp" aria-hidden="true"><label>Leave This Empty <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" /></label></div>
+
+  <fieldset class="step" data-step="0" aria-describedby="s1-help">
+    <legend><span class="num num--on">{pad2(1)}</span>What Would You Like To Build?</legend>
+    <p id="s1-help" class="help">Pick The Closest Match. You Can Change It Later.</p>
+    <div class="options">
+      {buildOptions.map((o) => (
+        <label class:list={['opt', o.value === 'not-sure' && 'opt--dashed']}>
+          <input type="radio" name="build" value={o.value} />
+          <span class="opt__top"><Icon paths={buildIcons[o.icon]} size={40} viewBox={40} /><span class="check" aria-hidden="true"></span></span>
+          <span class="opt__title">{o.title}</span>
+          <span class="opt__text">{o.text}</span>
+        </label>
+      ))}
+    </div>
+  </fieldset>
+
+  <fieldset class="step" data-step="1" aria-describedby="s2-help">
+    <legend><span class="num">{pad2(2)}</span>Where Are You Today?</legend>
+    <p id="s2-help" class="help">There’s No Wrong Answer. This Just Helps Us Prepare For Your Call.</p>
+    <div class="radios">
+      {stages.map((s) => (
+        <label class="radio">
+          <input type="radio" name="stage" value={s.value} />
+          <span class="box" aria-hidden="true"></span><span class="radio__t">{s.title}</span><span class="radio__s">{s.text}</span>
+        </label>
+      ))}
+    </div>
+  </fieldset>
+
+  <fieldset class="step" data-step="2" aria-describedby="s3-help">
+    <legend><span class="num">{pad2(3)}</span>Describe It In Your Own Words</legend>
+    <p id="s3-help" class="help">Imagine Explaining It To A Friend Over Coffee. Skip The Tech Terms. That’s Our Job.</p>
+    <div class="area">
+      <label for="brief-description" class="visually-hidden">Describe your idea</label>
+      <textarea id="brief-description" name="description" rows="5" maxlength="1000" data-count
+        placeholder="e.g. An App Where Dog Owners Can Book Trusted Walkers Nearby, Track The Walk Live On A Map, And Pay Inside The App…"></textarea>
+      <div class="area__foot">
+        <label class="attach"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M9.5 4.5L4.8 9.2C3.9 10.1 3.9 11.2 4.6 11.9C5.3 12.6 6.4 12.6 7.3 11.7L12 7C13.4 5.6 13.4 3.6 12.2 2.4C11 1.2 9 1.2 7.6 2.6L2.8 7.4" stroke="currentColor" stroke-width="1.3"/></svg>Attach Sketches, Docs Or A Voice Note (Optional)<input type="file" name="attachment" multiple accept="image/*,.pdf,.doc,.docx,.txt,audio/*" class="visually-hidden" /></label>
+        <span class="count" data-counter aria-live="polite">0 / 1000</span>
+      </div>
+    </div>
+    <div class="prompts"><span>Stuck? Try Answering:</span>{prompts.map((p) => <button type="button" class="prompt" data-prompt={p}>+ {p}</button>)}</div>
+  </fieldset>
+
+  <fieldset class="step step--last" data-step="3" aria-describedby="s4-help">
+    <legend><span class="num">{pad2(4)}</span>Budget, Timeline & How To Reach You</legend>
+    <p id="s4-help" class="help">“Not Sure” Is The Most Common Answer. We’ll Show You Options At Every Price Point.</p>
+    <fieldset class="group"><legend>Rough Budget</legend><div class="pills">
+      {budgets.map((b, i) => <label class:list={['pill', i === budgets.length - 1 && 'pill--dashed']}><input type="radio" name="budget" value={b} checked={i === budgets.length - 1} /><span>{b}</span></label>)}
+    </div></fieldset>
+    <fieldset class="group"><legend>Ideal Timeline</legend><div class="pills">
+      {timelines.map((t, i) => <label class="pill"><input type="radio" name="timeline" value={t} checked={i === timelines.length - 1} /><span>{t}</span></label>)}
+    </div></fieldset>
+    <div class="fields">
+      <div class="field"><label for="brief-name">Your Name</label><input id="brief-name" name="name" type="text" autocomplete="name" placeholder="e.g. Priya Sharma" required /></div>
+      <div class="field"><label for="brief-email">Email Address</label><input id="brief-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@company.com" required /></div>
+      <div class="field"><label for="brief-phone">Phone (Optional)</label><input id="brief-phone" name="phone" type="tel" autocomplete="tel" placeholder="+91 ····· ·····" /></div>
+      <div class="field"><label for="brief-method">Best Way To Reach You</label><select id="brief-method" name="contact_method">{contactMethods.map((m) => <option>{m}</option>)}</select></div>
+    </div>
+  </fieldset>
+
+  <div class="submit">
+    <label class="nda"><input type="checkbox" name="nda" value="yes" /><span class="box" aria-hidden="true"></span><span><strong>Send Me An NDA Before We Talk</strong><small>No Commitment, No Spam. A Real Person Replies Within 24 Hours.</small></span></label>
+    <button type="submit" class="send" data-fill>Send My Idea <span aria-hidden="true">→</span></button>
+  </div>
+</form>
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-brief]');
+  if (form) {
+    const names = ['Your Idea', 'Where You Are', 'The Details', 'Budget & Contact'];
+    const label = form.querySelector('[data-step-label]')!;
+    const segs = [...form.querySelectorAll<HTMLElement>('[data-seg]')];
+    const done = [
+      () => !!form.querySelector('input[name="build"]:checked'),
+      () => !!form.querySelector('input[name="stage"]:checked'),
+      () => (form.querySelector<HTMLTextAreaElement>('[name="description"]')!.value.trim().length > 20),
+      () => form.querySelector<HTMLInputElement>('[name="name"]')!.value.trim() !== '' && form.querySelector<HTMLInputElement>('[name="email"]')!.validity.valid,
+    ];
+    const update = () => {
+      const state = done.map((fn) => fn());
+      // Sequential progress: the current step is the first unfinished one; everything up to it is "reached".
+      const current = state.indexOf(false);
+      const reached = current === -1 ? names.length - 1 : current;
+      segs.forEach((s, i) => s.classList.toggle('on', i <= reached));
+      const next = current === -1 ? 'All Set · Ready To Send' : `Step ${current + 1} Of 4 · ${names[current]}`;
+      if (label.textContent !== next) { label.textContent = next; (label as HTMLElement).style.animation = 'none'; void (label as HTMLElement).offsetWidth; (label as HTMLElement).style.animation = ''; }
+      form.querySelectorAll<HTMLElement>('.num').forEach((n, i) => { n.classList.toggle('num--on', i <= reached); n.classList.toggle('num--done', i < reached || current === -1); });
+    };
+    form.addEventListener('input', update); form.addEventListener('change', update); update();
+    const ta = form.querySelector<HTMLTextAreaElement>('[data-count]')!, counter = form.querySelector('[data-counter]')!;
+    ta.addEventListener('input', () => (counter.textContent = `${ta.value.length} / 1000`));
+    form.querySelectorAll<HTMLButtonElement>('[data-prompt]').forEach((b) => b.addEventListener('click', () => {
+      ta.value = (ta.value.trim() ? ta.value.trim() + '\n' : '') + b.dataset.prompt + ' '; ta.focus(); ta.dispatchEvent(new Event('input', { bubbles: true }));
+    }));
+    const plan = new URLSearchParams(location.search).get('plan');
+    if (plan) form.querySelector<HTMLInputElement>('[data-plan]')!.value = plan;
+  }
+</script>
+<style>
+  .brief { background: var(--cream); padding: clamp(24px, 3vw, 40px); display: grid; gap: 40px; min-width: 0; }
+  .progress { display: grid; gap: 14px; }
+  .progress__label { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; font-size: 0.8125rem; }
+  .progress__label span { color: var(--brand-ink); }
+  .progress__bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .progress__bar span { position: relative; height: 4px; background: rgb(171 66 0 / .15); overflow: hidden; }
+  .progress__bar span::after { content: ''; position: absolute; inset: 0; background: var(--brand); transform: scaleX(0); transform-origin: 0 50%; transition: transform .8s cubic-bezier(.16,1,.3,1); }
+  .progress__bar span.on::after { transform: scaleX(1); }
+  [data-step-label] { display: inline-block; animation: label-in .6s cubic-bezier(.16,1,.3,1); }
+  @keyframes label-in { from { opacity: 0; transform: translateY(6px); } }
+  .hp { position: absolute; left: -9999px; }
+  fieldset { border: 0; padding: 0; min-width: 0; }
+  .step { display: grid; gap: 18px; padding-bottom: 40px; border-bottom: 1.5px solid var(--line-soft); }
+  .step--last { border-bottom: 0; padding-bottom: 0; }
+  .step > legend { display: flex; align-items: center; gap: 16px; font-family: var(--font-display); font-size: var(--fs-h4); line-height: 1.3; letter-spacing: var(--track-m); word-spacing: var(--words-m); padding: 0; margin-bottom: 18px; float: left; width: 100%; }
+  .step > legend + * { clear: both; }
+  .num { flex: none; width: 32px; height: 32px; display: grid; place-items: center; font-family: var(--font-body); font-size: 0.78rem; font-weight: 500; border: 1.2px solid rgb(171 66 0 / .4); background: var(--white); letter-spacing: 0; transition: .2s; }
+  .num--on { background: var(--brand); border-color: var(--brand); color: var(--white); }
+  .num--done { font-size: 0; }
+  .num--done::after { content: '✓'; font-size: 0.85rem; }
+  .help { font-size: 0.875rem; color: var(--brand-ink); margin-top: -8px; }
+  input[type='radio'], input[type='checkbox'] { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .options { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .opt { position: relative; cursor: pointer; display: grid; gap: 6px; align-content: start; padding: 18px; background: var(--white); border: 1.2px solid var(--line); transition: background-color .45s cubic-bezier(.16,1,.3,1), color .35s, border-color .3s, transform .5s cubic-bezier(.34,1.56,.64,1); }
+  .opt:hover { transform: translateY(-4px); }
+  .opt:active { transform: scale(.97); }
+  .opt :global(svg) { transition: transform .6s cubic-bezier(.34,1.56,.64,1); }
+  .opt:hover :global(svg), .opt:has(input:checked) :global(svg) { transform: scale(1.08); }
+  .check { transition: transform .45s cubic-bezier(.34,1.56,.64,1), background-color .3s; }
+  .opt:has(input:checked) .check { transform: scale(1.12); }
+  .opt--dashed { border-style: dashed; }
+  .opt__top { display: flex; justify-content: space-between; margin-bottom: 26px; }
+  .check { width: 18px; height: 18px; border: 1.2px solid rgb(171 66 0 / .35); }
+  .opt__title { font-weight: 500; font-size: var(--fs-body); }
+  .opt__text { font-size: 0.78rem; line-height: 1.5; color: var(--brand-ink); }
+  .opt:hover { border-color: var(--brand); }
+  .opt:has(input:checked) { background: var(--brand); border-color: var(--brand); color: var(--white); }
+  .opt:has(input:checked) .opt__text { color: var(--on-brand-muted); }
+  .opt:has(input:checked) .check { background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M4.5 9.5L7.5 12.5L13.5 5.5' fill='none' stroke='%23AB4200' stroke-width='1.8'/%3E%3C/svg%3E"); border-color: var(--white); }
+  .opt:has(input:focus-visible), .radio:has(input:focus-visible), .pill:has(input:focus-visible), .nda:has(input:focus-visible) { outline: 2px solid var(--brand); outline-offset: 3px; }
+  .radios { display: grid; gap: 12px; }
+  .radio { transition: border-color .3s, transform .45s cubic-bezier(.16,1,.3,1), box-shadow .3s; cursor: pointer; display: grid; grid-template-columns: 18px 1fr; column-gap: 14px; align-items: center; padding: 16px 18px; background: var(--white); border: 1.2px solid var(--line); }
+  .radio:hover { transform: translateX(6px); }
+  .radio__t { font-weight: 500; }
+  .radio__s { grid-column: 2; font-size: 0.78rem; color: var(--brand-ink); }
+  .box { width: 18px; height: 18px; border: 1.5px solid rgb(171 66 0 / .45); background: var(--white); }
+  .radio:has(input:checked) { border-color: var(--brand); box-shadow: inset 0 0 0 .5px var(--brand); }
+  .radio:has(input:checked) .box, .nda:has(input:checked) .box { border-color: var(--brand); background: radial-gradient(var(--brand) 0 0) center / 8px 8px no-repeat, var(--white); }
+  @media (min-width: 700px) { .radio { grid-template-columns: 18px auto 1fr; } .radio__s { grid-column: 3; text-align: right; } }
+  .area { background: var(--white); border: 1.2px solid rgb(171 66 0 / .3); }
+  .area:focus-within { border-color: var(--brand); }
+  textarea { display: block; width: 100%; min-height: 120px; resize: vertical; border: 0; background: transparent; padding: 18px; font-size: 0.875rem; line-height: 1.64; color: var(--brand); }
+  textarea::placeholder, input::placeholder { color: var(--brand-ink); opacity: .75; }
+  textarea:focus { outline: none; }
+  .area__foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding: 0 18px 16px; font-size: 0.75rem; }
+  .attach { display: inline-flex; gap: 8px; align-items: center; font-weight: 500; cursor: pointer; }
+  .attach:hover { text-decoration: underline; }
+  .count { color: var(--brand-ink); }
+  .prompts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 0.78rem; }
+  .prompts > span { color: var(--brand-ink); }
+  .prompt { padding: 7px 11px; background: var(--white); border: 1.2px solid var(--line); font-weight: 500; font-size: 0.75rem; }
+  .prompt:hover { border-color: var(--brand); }
+  .group { display: grid; gap: 10px; }
+  .group legend { font-weight: 500; font-size: 0.78rem; color: var(--brand-ink); margin-bottom: 10px; }
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill { cursor: pointer; }
+  .pill span { display: inline-block; padding: 11px 16px; background: var(--white); border: 1.2px solid var(--line); font-weight: 500; font-size: 0.84rem; transition: background-color .4s cubic-bezier(.16,1,.3,1), color .3s, border-color .3s, transform .45s cubic-bezier(.34,1.56,.64,1); }
+  .pill:hover span { transform: translateY(-3px); }
+  .pill:active span { transform: scale(.95); }
+  .pill--dashed span { border-style: dashed; }
+  .pill:hover span { border-color: var(--brand); }
+  .pill:has(input:checked) span { background: var(--brand); border-color: var(--brand); color: var(--white); }
+  .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .field { display: grid; gap: 8px; }
+  .field label { font-weight: 500; font-size: 0.78rem; color: var(--brand-ink); }
+  .field input, .field select { width: 100%; padding: 15px 16px; background: var(--white); border: 1.2px solid rgb(171 66 0 / .28); font-size: 0.875rem; color: var(--brand); border-radius: 0; appearance: none; }
+  .field select { background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23AB4200' stroke-width='1.5'/%3E%3C/svg%3E") right 16px center no-repeat; }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--brand); box-shadow: inset 0 0 0 .5px var(--brand); }
+  .field input:user-invalid { border-color: #c2261a; }
+  .submit { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; padding-top: 28px; border-top: 1.5px solid var(--line-soft); }
+  .nda { cursor: pointer; display: flex; gap: 10px; align-items: center; }
+  .nda strong { display: block; font-size: 0.875rem; }
+  .nda small { display: block; font-size: 0.75rem; color: var(--brand-ink); }
+  .send { position: relative; overflow: hidden; isolation: isolate; display: inline-flex; gap: 12px; align-items: center; padding: 18px 28px; background: var(--brand); color: var(--white); font-weight: 500; font-size: 1rem; }
+  .send::before { content: ''; position: absolute; inset: -1px; z-index: -1; background: #7a2f00; clip-path: circle(0% at var(--fx, 50%) var(--fy, 100%)); transition: clip-path .7s cubic-bezier(.16,1,.3,1); }
+  .send:hover::before, .send:focus-visible::before { clip-path: circle(150% at var(--fx, 50%) var(--fy, 100%)); }
+  .send span { display: inline-block; transition: transform .5s cubic-bezier(.16,1,.3,1); }
+  .send:hover span { transform: translateX(6px); }
+  @media (max-width: 600px) { .brief { padding-left: var(--card-x-m); padding-right: var(--card-x-m); } }   /* unified mobile card inset */
+</style>

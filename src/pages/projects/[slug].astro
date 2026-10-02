@@ -1,0 +1,60 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectHero from '../../components/project/ProjectHero.astro';
+import HeroVisual from '../../components/project/HeroVisual.astro';
+import Metrics from '../../components/project/Metrics.astro';
+import Narrative from '../../components/project/Narrative.astro';
+import Modules from '../../components/project/Modules.astro';
+import Architecture from '../../components/project/Architecture.astro';
+import TechStack from '../../components/project/TechStack.astro';
+import Credits from '../../components/project/Credits.astro';
+import PageSpeed from '../../components/project/PageSpeed.astro';
+import OpenSource from '../../components/project/OpenSource.astro';
+import NextProject from '../../components/project/NextProject.astro';
+import CtaBand from '../../components/ui/CtaBand.astro';
+import { projects, nextProject } from '../../data/projects';
+import { site } from '../../data/site';
+import { flat } from '../../lib/text';
+import { graph, organization, website, webPage, breadcrumbs, abs, ids } from '../../lib/schema';
+
+export const getStaticPaths = (() => projects.map((p) => ({ params: { slug: p.slug }, props: { project: p } }))) satisfies GetStaticPaths;
+const { project } = Astro.props;
+const cs = project.caseStudy;
+const path = `/projects/${project.slug}/`;
+const title = `${project.name} Case Study · ${project.category}`;
+// Meta descriptions stay under ~155 characters and end on a whole word with a full stop (no mid-sentence cut-offs in Google).
+const clip = (s: string, max = 155) => { if (s.length <= max) return s; const cut = s.slice(0, max - 1); return cut.slice(0, cut.lastIndexOf(' ')).replace(/[\s,:;·-]+$/, '') + '…'; };
+const description = clip(`${cs.role} for ${project.name}: ${flat(project.summary).replace(/\.$/, '')}.`);
+const image = `/og/${project.slug}.png`;
+const external = cs.liveUrl ?? cs.repoUrl;
+const about = cs.appCategory === 'WebSite'
+  ? { '@type': 'WebSite', name: project.name, url: cs.liveUrl, description: project.summary }
+  : { '@type': 'SoftwareApplication', name: project.name, applicationCategory: cs.appCategory, operatingSystem: 'Web', description: project.summary, ...(external ? { url: external } : {}), ...(cs.repoUrl ? { codeRepository: cs.repoUrl, license: 'https://opensource.org/licenses/MIT' } : {}) };
+const jsonLd = graph(
+  organization(), website(),
+  webPage({ path, title, description, image, breadcrumbs: true, dateModified: cs.updated }),
+  breadcrumbs(path, [{ name: 'Home', path: '/' }, { name: 'Projects', path: '/projects/' }, { name: project.name, path }]),
+  {
+    '@type': 'Article', '@id': `${abs(path)}#article`, headline: title, description, image: abs(image),
+    datePublished: cs.published, dateModified: cs.updated, author: { '@id': ids.org }, publisher: { '@id': ids.org },
+    mainEntityOfPage: { '@id': `${abs(path)}#webpage` }, about, articleSection: 'Case Studies',
+    keywords: cs.stack.flatMap((g) => g.items).join(', '),
+  },
+);
+const next = nextProject(project.slug);
+---
+<BaseLayout title={title} description={description} image={image} imageAlt={`${project.name} case study by ${site.name}`} type="article" published={cs.published} modified={cs.updated} jsonLd={jsonLd}>
+  <ProjectHero project={project} cs={cs} />
+  <HeroVisual slug={project.slug} name={project.name} label={cs.dashboardLabel} screenshot={cs.screenshot} />
+  <Metrics metrics={cs.facts} />
+  <Narrative items={cs.narrative} title={cs.overviewTitle} />
+  <Modules modules={cs.modules} title={cs.modulesTitle} lead={cs.modulesLead} />
+  <Architecture arch={cs.architecture} name={project.name} />
+  <TechStack cs={cs} />
+  {cs.openSource && <OpenSource os={cs.openSource} name={project.name} />}
+  {cs.credits && <Credits text={cs.credits} />}
+  {cs.pagespeed && <PageSpeed scores={cs.pagespeed} url={cs.liveUrl} name={project.name} />}
+  <NextProject project={next} />
+  <CtaBand />
+</BaseLayout>

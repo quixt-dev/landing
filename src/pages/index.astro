@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/home/Hero.astro';
+import About from '../components/home/About.astro';
+import HeroMedia from '../components/home/HeroMedia.astro';
+import Services from '../components/home/Services.astro';
+import Process from '../components/home/Process.astro';
+import Products from '../components/home/Products.astro';
+import Pricing from '../components/home/Pricing.astro';
+import Testimonials from '../components/home/Testimonials.astro';
+import FAQ from '../components/home/FAQ.astro';
+import { site } from '../data/site';
+import { services, pricing, faqs } from '../data/home';
+import { graph, organization, website, webPage, serviceCatalog, faqPage } from '../lib/schema';
+
+const title = 'Quixt · Web, App & SaaS Development Agency';
+const description = 'Quixt builds high-performance websites, mobile apps, SaaS products and custom software for startups and growing businesses. Fixed prices, weekly demos.';
+const jsonLd = graph(
+  organization(),
+  website(),
+  webPage({ path: '/', title, description, image: site.ogImage }),
+  serviceCatalog(services, pricing.plans),
+  faqPage('/', faqs),
+);
+---
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+  <Hero />
+  <About />
+  <HeroMedia />
+  <Services />
+  <Process />
+  <Products />
+  <Pricing />
+  <Testimonials />
+  <FAQ items={faqs} />
+</BaseLayout>

@@ -1,0 +1,24 @@
+---
+import SectionHeader from '../ui/SectionHeader.astro';
+import { pad2 } from '../../lib/text';
+const { items, title } = Astro.props as { items: { title: string; text: string }[]; title: string };
+---
+<section class="section container" aria-labelledby="overview-title">
+  <SectionHeader id="overview-title" eyebrow="02 · Overview" title={title} />
+  <div class="nar" data-stagger data-each=".12">
+    {items.map((it, i) => (
+      <article class="nar__block">
+        <h3 class="nar__label"><span class:list={['sq', i === items.length - 1 && 'sq--fill']} aria-hidden="true"></span>{pad2(i + 1)}&nbsp; {it.title}</h3>
+        <p class="nar__text">{it.text}</p>
+      </article>
+    ))}
+  </div>
+</section>
+<style>
+  .nar { margin-top: 56px; display: grid; gap: 40px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+  .nar__block { border-top: 1.5px solid var(--line); padding-top: 26px; display: grid; gap: 16px; align-content: start; }
+  .nar__label { display: flex; align-items: center; gap: 10px; font-family: var(--font-body); font-weight: 500; font-size: 0.875rem; }
+  .sq { width: 10px; height: 10px; border: 1.5px solid var(--brand); }
+  .sq--fill { background: var(--brand); }
+  .nar__text { font-family: var(--font-display); font-size: clamp(1.1rem, 1.5vw, 1.3125rem); line-height: 1.48; letter-spacing: -0.01em; }
+</style>

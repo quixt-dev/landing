@@ -1,0 +1,57 @@
+---
+import '@fontsource/roboto-mono/400.css';
+import '@fontsource/roboto-mono/500.css';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
+import '../styles/global.css';
+import robotoMono400 from '@fontsource/roboto-mono/files/roboto-mono-latin-400-normal.woff2?url';
+import plexMono400 from '@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2?url';
+import SEO, { type Props as SEOProps } from '../components/seo/SEO.astro';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import Loader from '../components/layout/Loader.astro';
+
+export type Props = SEOProps;
+const props = Astro.props;
+---
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <script is:inline>
+      // Enable motion pre-states before first paint; always reveal content within 2.5s even if JS fails.
+      // First visit of the session also gets the loader (zx-loading). The page intro waits on __zxReveal, and the
+      // loader is force-dismissed after 6s whatever happens, so content can never stay covered.
+      (function (d, w) {
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        d.classList.add('motion'); setTimeout(function () { d.classList.add('motion-ready'); }, 2500);
+        var seen; try { seen = sessionStorage.getItem('zx-loaded'); } catch (e) { seen = 1; }
+        if (seen) return;
+        var done; d.classList.add('zx-loading');
+        w.__zxReveal = new Promise(function (r) { done = r; });
+        w.__zxRevealNow = function () { if (done) { done(); done = null; } };
+        setTimeout(function () { if (d.classList.contains('zx-loading')) { d.classList.remove('zx-loading'); w.__zxRevealNow(); } }, 6000);
+      })(document.documentElement, window);
+    </script>
+    <link rel="preload" href={robotoMono400} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={plexMono400} as="font" type="font/woff2" crossorigin />
+    <SEO {...props} />
+    <slot name="head" />
+  </head>
+  <body>
+    <Loader />
+    <a class="skip-link" href="#main">Skip To Content</a>
+    <div class="scroll-progress" aria-hidden="true"></div>
+    <div class="page">
+      <Header />
+      <main id="main" tabindex="-1">
+        <slot />
+      </main>
+      <Footer />
+    </div>
+    <script>
+      import '../scripts/motion';
+      // Art intros wait for the loader to start dissolving, so they play in view rather than under the overlay.
+      if (document.querySelector('svg[data-art], img[data-inline-art]')) ((window as any).__zxReveal ?? Promise.resolve()).then(() => import('../scripts/artMotion'));
+    </script>
+  </body>
+</html>

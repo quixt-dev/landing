@@ -1,0 +1,14 @@
+---
+import { promises } from '../../data/contact';
+---
+<section class="pm" aria-labelledby="pm-title">
+  <h3 id="pm-title" class="pm__title">Our Promise To You</h3>
+  <ul role="list" data-stagger data-each=".08">{promises.map((p) => <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect width="16" height="16" fill="#AB4200"/><path d="M4 8.5L6.8 11.2L12 5.2" stroke="#fff" stroke-width="1.6" fill="none"/></svg>{p}</li>)}</ul>
+</section>
+<style>
+  .pm { padding: 28px; border: 1.5px solid var(--line); display: grid; gap: 14px; }
+  .pm__title { font-family: var(--font-body); font-weight: 500; font-size: var(--fs-body); }
+  ul { display: grid; gap: 14px; }
+  li { display: flex; align-items: center; gap: 12px; font-size: 0.875rem; }
+  li svg { flex: none; }
+</style>

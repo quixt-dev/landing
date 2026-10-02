@@ -1,0 +1,22 @@
+---
+/** Brand wordmark (public/logo.svg). Height drives the size; the aspect ratio is fixed by the artwork. */
+const { height = 30, invertible = false } = Astro.props as { height?: number; invertible?: boolean };
+const ratio = 3094.24 / 1382.3;   // public/logo.svg viewBox (scripts/brand/build-logo.mjs)
+---
+{invertible ? (
+  <span class="logo-swap">
+    <img class="logo" src="/logo.svg" width={Math.round(height * ratio)} height={height} alt="Quixt" decoding="async" />
+    <img class="logo logo--brand" src="/logo-brand.svg" width={Math.round(height * ratio)} height={height} alt="" aria-hidden="true" decoding="async" />
+  </span>
+) : (
+  <img class="logo" src="/logo.svg" width={Math.round(height * ratio)} height={height} alt="Quixt" decoding="async" />
+)}
+<style>
+  .logo { display: block; height: auto; width: auto; max-height: var(--logo-h, 30px); }
+  /* white and orange wordmarks stacked; the header cross-fades them when it inverts over the orange footer */
+  .logo-swap { position: relative; display: block; }
+  .logo-swap .logo { transition: opacity .45s cubic-bezier(.16,1,.3,1); }
+  .logo--brand { position: absolute; left: 0; top: 0; opacity: 0; }
+  :global(.site-header.is-inverted) .logo-swap .logo:first-child { opacity: 0; }
+  :global(.site-header.is-inverted) .logo--brand { opacity: 1; }
+</style>

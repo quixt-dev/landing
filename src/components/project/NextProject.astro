@@ -1,0 +1,29 @@
+---
+import { graphicSrc } from '../../lib/graphics/registry';
+import type { Project } from '../../data/projects';
+import Button from '../ui/Button.astro';
+const { project } = Astro.props as { project: Project };
+const href = `/projects/${project.slug}/`;
+---
+<section class="section container" aria-labelledby="next-title">
+  <div class="np">
+    <img class="np__art" data-inline-art="card" src={graphicSrc(`product-${project.slug}`)} width="786" height="396" alt="" loading="lazy" decoding="async" />
+    <div class="np__copy" data-reveal>
+      <p class="eyebrow">Next Project &nbsp;→</p>
+      <h2 id="next-title" class="np__name">{project.name}</h2>
+      <p class="muted">{project.category} · {project.year}</p>
+      <Button href={href} variant="solid">View Project &nbsp;→</Button>
+    </div>
+  </div>
+</section>
+<style>
+  .np { transition: background-color .6s; position: relative; background: var(--cream); overflow: hidden; min-height: 400px; display: grid; }
+  .np__art { position: absolute; right: 0; bottom: -2px; width: min(786px, 58%); height: auto; }
+  .np__copy { position: relative; padding: 48px; display: grid; gap: 14px; align-content: start; justify-items: start; }
+  .np:hover { background: var(--cream-2); }
+  .np__name { transition: letter-spacing .8s cubic-bezier(.16,1,.3,1); font-size: clamp(4rem, 8.4vw, 7.5rem); line-height: 1.08; letter-spacing: var(--track-display); word-spacing: var(--words-display); }
+  .np:hover .np__name { letter-spacing: -0.025em; }
+  .np__copy :global(.btn) { margin-top: 44px; }
+  @media (max-width: 760px) { .np { min-height: 560px; } .np__art { width: 100%; } .np__copy { padding: 32px 24px; } }
+  @media (max-width: 600px) { .np__copy { padding-left: var(--card-x-m); padding-right: var(--card-x-m); } }   /* unified mobile card inset */
+</style>

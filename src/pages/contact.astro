@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHeader from '../components/ui/SectionHeader.astro';
+import ContactHero from '../components/contact/ContactHero.astro';
+import ProjectBriefForm from '../components/contact/ProjectBriefForm.astro';
+import BookCall from '../components/contact/BookCall.astro';
+import DirectLines from '../components/contact/DirectLines.astro';
+import PromiseCard from '../components/contact/PromiseCard.astro';
+import NextSteps from '../components/contact/NextSteps.astro';
+import Translator from '../components/contact/Translator.astro';
+import Glossary from '../components/contact/Glossary.astro';
+import StarterKit from '../components/contact/StarterKit.astro';
+import FAQ from '../components/home/FAQ.astro';
+import { site } from '../data/site';
+import { contactFaqs, glossary } from '../data/contact';
+import { graph, organization, website, webPage, breadcrumbs, faqPage, definedTermSet, ids, abs } from '../lib/schema';
+
+const path = '/contact/';
+const title = 'Contact Quixt · Start A Project Or Book A Free 30-Min Call';
+const description = 'Tell us your idea in plain English, no specs or tech skills needed. Get a reply in 24 hours, a free 30-min call and a fixed-price proposal in 3 days.';
+const jsonLd = graph(
+  organization(), website(),
+  { ...webPage({ path, title, description, type: 'ContactPage', breadcrumbs: true, image: '/og/contact.png' }), mainEntity: { '@id': ids.org } },
+  breadcrumbs(path, [{ name: 'Home', path: '/' }, { name: 'Contact', path }]),
+  faqPage(path, contactFaqs),
+  definedTermSet(path, glossary),
+  {
+    '@type': 'HowTo',
+    '@id': `${abs(path)}#how-it-works`,
+    name: 'How to start a project with Quixt',
+    totalTime: 'P7D',
+    step: [
+      { '@type': 'HowToStep', position: 1, name: 'Share your idea', text: 'Fill in the four-step project brief or book a free 30-minute call. No technical knowledge needed.' },
+      { '@type': 'HowToStep', position: 2, name: 'We reply', text: 'A real person replies within 24 hours.' },
+      { '@type': 'HowToStep', position: 3, name: 'Discovery call', text: 'A relaxed 30-minute conversation about your idea, users and goals.' },
+      { '@type': 'HowToStep', position: 4, name: 'Clear proposal', text: 'Within three days you receive scope, screens, a fixed price and a timeline in plain English.' },
+      { '@type': 'HowToStep', position: 5, name: 'Kick-off', text: 'Meet your team and see a first demo within two weeks.' },
+    ],
+  },
+);
+---
+<BaseLayout title={title} description={description} image="/og/contact.png" imageAlt={`Contact ${site.name}`} jsonLd={jsonLd}>
+  <ContactHero />
+  <section id="brief" class="section container" aria-labelledby="brief-heading">
+    <SectionHeader id="brief-heading" eyebrow="01 · Project Brief" title={'Four Short Steps,\nAbout Two Minutes'} lead="Every Question Has A “Not Sure” Option. Rough Answers Are Perfectly Fine, We’ll Work Out The Details Together." />
+    <div class="brief-row">
+      <ProjectBriefForm />
+      <aside class="side" aria-label="Other ways to reach us" data-stagger data-each=".12">
+        <BookCall />
+        <DirectLines />
+        <PromiseCard />
+      </aside>
+    </div>
+  </section>
+  <NextSteps />
+  <Translator />
+  <Glossary />
+  <StarterKit />
+  <FAQ items={contactFaqs} layout="split" eyebrow="06 · FAQ" title={'Questions First-\nTime Founders\nAsk Us'} lead="Still Wondering Something? Ask Us Anything On The Free Call, There Are No Silly Questions." />
+</BaseLayout>
+<style>
+  .brief-row { margin-top: 56px; display: grid; gap: 20px; }
+  .side { display: grid; gap: 20px; align-content: start; }
+  @media (min-width: 1100px) { .brief-row { grid-template-columns: minmax(0, 1fr) 446px; align-items: start; } }
+</style>

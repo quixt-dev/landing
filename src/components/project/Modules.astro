@@ -1,0 +1,70 @@
+---
+import SectionHeader from '../ui/SectionHeader.astro';
+import TagList from '../ui/TagList.astro';
+import { moduleArts } from '../../lib/graphics/projectArt';
+import type { CaseStudy } from '../../data/projects';
+const { modules, title, lead } = Astro.props as { modules: CaseStudy['modules']; title: string; lead: string };
+---
+<section class="section container" aria-labelledby="modules-title">
+  <SectionHeader id="modules-title" eyebrow="03 · What We Built" title={title} lead={lead} />
+  <div class="bento" data-stagger data-each=".1">
+    {modules.map((m, i) => {
+      const w = m.wide ? 851 : 415;
+      return (
+        <article class:list={['tile', m.dark && 'tile--dark', m.wide && 'tile--wide']} data-spot>
+          <div class="tile__media">
+            <span class="tile__grid" aria-hidden="true"></span>
+            <svg class="tile__art" data-art={m.art} style={`--art-bg:${m.dark ? '#AB4200' : '#FDF4EF'}`} fill="none" viewBox={`-8 -6 ${w + 16} 252`} preserveAspectRatio="xMidYMid meet" aria-hidden="true" set:html={moduleArts[m.art](w, 240, m.dark ? '#fff' : '#AB4200')} />
+          </div>
+          <div class="tile__body">
+            <h3 class="tile__title">{m.title}</h3>
+            <p class="tile__text">{m.text}</p>
+            <TagList tags={m.tags} tone={m.dark ? 'on-brand' : 'light'} label={`${m.title} technologies`} />
+          </div>
+        </article>
+      );
+    })}
+  </div>
+</section>
+<style>
+  .bento { margin-top: 56px; display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+  .tile { position: relative; background: var(--cream); display: grid; grid-template-rows: 240px auto; overflow: hidden; min-height: 450px; transition: transform .7s cubic-bezier(.16,1,.3,1); }
+  .tile:hover { transform: translateY(-6px); }
+  .tile--dark { background: var(--brand); color: var(--white); }
+  .tile--dark .tile__media { background: var(--brand); }
+  /* The blueprint grid is its own layer behind the art (the art's built-in grid is hidden here), so only the grid
+     fades. The mask is a top-anchored ellipse with eased stops (no banding), and a lightly blurred copy of the grid
+     takes over where it fades, so the lines soften into the tile like depth of field. The art itself stays sharp. */
+  .tile__media { position: relative; height: 240px; overflow: hidden; isolation: isolate; }
+  .tile__grid {
+    --g: rgb(171 66 0 / .07); --step: 16px; --lw: 1px; /* whole-pixel step keeps every line equally crisp */
+    position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    --fade: radial-gradient(64% 108% at 50% 0%, #000 0%, rgb(0 0 0 / .97) 22%, rgb(0 0 0 / .9) 36%, rgb(0 0 0 / .78) 48%, rgb(0 0 0 / .62) 58%, rgb(0 0 0 / .45) 67%, rgb(0 0 0 / .29) 75%, rgb(0 0 0 / .16) 83%, rgb(0 0 0 / .07) 90%, transparent 100%);
+    -webkit-mask-image: var(--fade); mask-image: var(--fade);
+  }
+  .tile--dark .tile__grid { --g: rgb(255 255 255 / .085); }
+  @media (min-resolution: 2dppx) { .tile__grid { --lw: .5px; } } /* hairlines on retina, like the original .5 stroke */
+  .tile__grid::before, .tile__grid::after {
+    content: ''; position: absolute; inset: -6px;
+    background-image: linear-gradient(90deg, var(--g) var(--lw), transparent var(--lw)), linear-gradient(180deg, var(--g) var(--lw), transparent var(--lw));
+    background-size: var(--step) var(--step); background-position: center 6px;
+  }
+  .tile__grid::before { -webkit-mask-image: radial-gradient(64% 108% at 50% 6px, #000 40%, transparent 78%); mask-image: radial-gradient(64% 108% at 50% 6px, #000 40%, transparent 78%); }
+  .tile__grid::after { filter: blur(.7px); opacity: .85; -webkit-mask-image: radial-gradient(64% 108% at 50% 6px, transparent 40%, #000 78%); mask-image: radial-gradient(64% 108% at 50% 6px, transparent 40%, #000 78%); }
+  .tile__art :global(.bp-grid) { display: none; }
+  .tile__art { display: block; width: 100%; height: 240px; transition: transform 1.2s cubic-bezier(.16,1,.3,1); }
+  .tile:hover .tile__art { transform: scale(1.04); }
+  .tile__art :global(.marching) { animation: march .9s linear infinite; }
+  @keyframes march { to { stroke-dashoffset: -14; } }
+  @media (prefers-reduced-motion: reduce) { .tile__art :global(.marching) { animation: none; } }
+  .tile__body { padding: 22px 30px 32px; display: grid; gap: 10px; align-content: start; max-width: 36rem; }
+  .tile__title { font-size: clamp(1.4rem, 2vw, 1.5625rem); line-height: 1.25; letter-spacing: var(--track-m); word-spacing: var(--words-m); }
+  .tile__text { font-size: 0.875rem; line-height: 1.57; color: var(--brand-ink); margin-bottom: 10px; }
+  .tile--dark .tile__text { color: var(--on-brand-muted); }
+  @media (min-width: 1100px) {
+    .bento { grid-template-columns: repeat(3, 1fr); }
+    .tile--wide { grid-column: span 2; }
+    .tile--wide .tile__title { font-size: 1.875rem; letter-spacing: var(--track-l); word-spacing: var(--words-l); }
+  }
+  @media (max-width: 600px) { .tile__body { padding-left: var(--card-x-m); padding-right: var(--card-x-m); } }   /* unified mobile card inset */
+</style>
