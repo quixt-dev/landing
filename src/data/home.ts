@@ -6,6 +6,8 @@ export const hero = {
 /** Studio film behind the hero photo. Hosted on Mux (public playback ID), played in the custom theatre player. */
 export const film = {
   playbackId: 'rR8P8mSaKDzz02TsftugTUdI00cQPJX00oy',
+  /** Mux asset ID (for the Mux dashboard / API; playback uses `playbackId`). */
+  assetId: '9UpFQAM9CXwW4hy2PECBh4RUgTMtDukUOxh3M00diqTQ',
   label: 'Why Us',
   title: 'Why Quixt',
   eyebrow: '01 · Studio Film',

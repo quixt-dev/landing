@@ -5,7 +5,7 @@
  * shows intent ([data-film-open] hover / focus / touch), then a click morphs the trigger photo into the stage.
  * Keyboard: Space/K play · ←/→ 5 s · J/L 10 s · ↑/↓ volume · M mute · F fullscreen · C captions · 0–9 jump · Esc close
  */
-interface Props { playbackId: string; title: string; eyebrow: string; label: string }
+interface Props { playbackId: string; assetId?: string; title: string; eyebrow: string; label: string }
 const { playbackId, title, eyebrow } = Astro.props;
 const poster = `https://image.mux.com/${playbackId}/thumbnail.webp?width=1920&time=0`;
 ---
