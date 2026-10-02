@@ -5,7 +5,10 @@ export const hero = {
 
 /** Studio film behind the hero photo. Hosted on Mux (public playback ID), played in the custom theatre player. */
 export const film = {
+  /** 16:9 cut: desktops, laptops, tablets and landscape phones. */
   playbackId: 'm6aI1oyPrXtg5sR01tHkHzeSO558ugEX00PaBmckCnz00A',
+  /** 9:16 cut: phones held upright (portrait viewport under 768px), so nobody has to rotate. */
+  portraitPlaybackId: '00kyvmDNQPD2OztwUiSQh5nm9XGbru9QDKVGx8o6AoGM',
   /** Mux asset ID (for the Mux dashboard / API; playback uses `playbackId`). */
   assetId: '9UpFQAM9CXwW4hy2PECBh4RUgTMtDukUOxh3M00diqTQ',
   label: 'Why Us',

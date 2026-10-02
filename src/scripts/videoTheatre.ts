@@ -27,8 +27,14 @@ const ICON = {
 
 export function createTheatre(dlg: HTMLDialogElement): Theatre {
   const q = <T extends Element = HTMLElement>(s: string) => dlg.querySelector<T>(s)!;
-  const id = dlg.dataset.playbackId!;
-  const src = `https://stream.mux.com/${id}.m3u8`;
+  // Two cuts of the same film: 16:9 everywhere, 9:16 for phones held upright (no rotating needed).
+  const ids = { landscape: dlg.dataset.playbackId!, portrait: dlg.dataset.portraitId || '' };
+  const phonePortrait = window.matchMedia('(orientation: portrait) and (max-width: 767px)');
+  type Variant = keyof typeof ids;
+  const pick = (): Variant => (ids.portrait && phonePortrait.matches ? 'portrait' : 'landscape');
+  let variant: Variant = pick();
+  const srcOf = (v: Variant) => `https://stream.mux.com/${ids[v]}.m3u8`;
+  const posterOf = (v: Variant) => `https://image.mux.com/${ids[v]}/thumbnail.webp?width=${v === 'portrait' ? 1080 : 1920}&time=0`;
   const video = q<HTMLVideoElement>('[data-video]');
   const stage = q('[data-stage]'), ui = q('[data-ui]'), bg = q('[data-bg]');
   const chrome = [...dlg.querySelectorAll<HTMLElement>('[data-chrome]')];
@@ -44,7 +50,9 @@ export function createTheatre(dlg: HTMLDialogElement): Theatre {
   let loading: Promise<void> | null = null;
   let cues: Cue[] = [];
   let sheet = '';
+  const boards: Partial<Record<Variant, { cues: Cue[]; sheet: string }>> = {};
   let source: Element | null = null;
+  let sheetW = 0;
   let idleT = 0, raf = 0, spinT = 0;
   let dragging = false, wasPlaying = false;
   let lastFocus: HTMLElement | null = null;
@@ -54,8 +62,31 @@ export function createTheatre(dlg: HTMLDialogElement): Theatre {
 
   function warm() {
     if (useMse()) import('hls.js');
-    if (!cues.length) loadStoryboard();
+    loadStoryboard(pick());
   }
+
+  // Applies a cut to the stage: shape, poster and storyboard. The stream itself is swapped in load()/swap().
+  function applyVariant(v: Variant) {
+    variant = v;
+    stage.classList.toggle('is-portrait', v === 'portrait');
+    video.poster = posterOf(v);
+    const b = boards[v];
+    cues = b?.cues ?? []; sheet = b?.sheet ?? ''; sheetW = 0;
+    thumb.classList.remove('has-img');
+    if (!b) loadStoryboard(v);
+  }
+
+  // Rotating the phone mid-play swaps to the other cut at the same timestamp.
+  async function swap(v: Variant) {
+    if (v === variant || !loading) { applyVariant(v); return; }
+    const t = video.currentTime, playing = !video.paused && !video.ended;
+    applyVariant(v);
+    await loading;
+    const resume = () => { video.currentTime = Math.min(t, (video.duration || t) - 0.1); if (playing) play(); };
+    video.addEventListener('loadedmetadata', resume, { once: true });
+    if (hls) hls.loadSource(srcOf(v)); else video.src = srcOf(v);
+  }
+  phonePortrait.addEventListener('change', () => { if (dlg.open) swap(pick()); });
 
   function load(): Promise<void> {
     return (loading ??= (async () => {
@@ -71,19 +102,22 @@ export function createTheatre(dlg: HTMLDialogElement): Theatre {
             if (d.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
             else if (d.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
           });
-          hls.loadSource(src);
+          hls.loadSource(srcOf(variant));
           hls.attachMedia(video);
           return;
         }
       }
-      video.src = src; // native HLS (Safari / iOS)
+      video.src = srcOf(variant); // native HLS (Safari / iOS)
       video.textTracks.addEventListener?.('addtrack', syncCaptions);
     })());
   }
 
-  async function loadStoryboard() {
+  const fetching = new Set<Variant>();
+  async function loadStoryboard(v: Variant) {
+    if (boards[v] || fetching.has(v)) return;
+    fetching.add(v);
     try {
-      const vtt = await (await fetch(`https://image.mux.com/${id}/storyboard.vtt`)).text();
+      const vtt = await (await fetch(`https://image.mux.com/${ids[v]}/storyboard.vtt`)).text();
       const ts = (t: string) => t.split(':').reduce((a, n) => a * 60 + parseFloat(n), 0);
       const lines = vtt.split(/\r?\n/);
       const out: Cue[] = [];
@@ -93,11 +127,13 @@ export function createTheatre(dlg: HTMLDialogElement): Theatre {
         const [url, xywh] = (lines[i + 1] ?? '').split('#xywh=');
         if (!xywh) continue;
         const [x, y, w, h] = xywh.split(',').map(Number);
-        sheet = url; out.push({ s: ts(m[1]), e: ts(m[2]), x, y, w, h });
+        url && (boards[v] ??= { cues: out, sheet: url });
+        out.push({ s: ts(m[1]), e: ts(m[2]), x, y, w, h });
       }
-      cues = out;
-      if (sheet) new Image().src = sheet;
-    } catch { /* thumbnails are optional */ }
+      const b = boards[v];
+      if (b?.sheet) new Image().src = b.sheet;
+      if (b && v === variant) { cues = b.cues; sheet = b.sheet; }
+    } catch { /* thumbnails are optional */ } finally { fetching.delete(v); }
   }
 
   /* ------------------------------------------------------------ open / close */
@@ -121,6 +157,9 @@ export function createTheatre(dlg: HTMLDialogElement): Theatre {
     source = from ?? null;
     lastFocus = document.activeElement as HTMLElement | null;
     lock(true);
+    // choose the cut before showModal so the stage is measured in its final shape for the morph
+    const want = pick();
+    if (!loading) applyVariant(want); else if (want !== variant) void swap(want);
     dlg.showModal();
     resetUi();
     const start = load().then(() => play(true));
@@ -252,8 +291,7 @@ export function createTheatre(dlg: HTMLDialogElement): Theatre {
     }
     return t;
   }
-  // background-size needs the sprite's natural width; measure it once
-  let sheetW = 0;
+  // background-size needs the sprite's natural width; measured once per sprite (sheetW is reset in applyVariant)
   function sizeSheet(scale: number) {
     if (sheetW) { thumb.style.backgroundSize = `${sheetW * scale}px auto`; return; }
     const im = new Image(); im.onload = () => { sheetW = im.naturalWidth; thumb.style.backgroundSize = `${sheetW * scale}px auto`; }; im.src = sheet;

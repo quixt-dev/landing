@@ -3,13 +3,15 @@
  * Full-screen "theatre" video player for a Mux public playback ID.
  * The markup ships as a closed <dialog>; src/scripts/videoTheatre.ts (and hls.js) load only when a visitor
  * shows intent ([data-film-open] hover / focus / touch), then a click morphs the trigger photo into the stage.
+ * With `portraitPlaybackId`, phones held upright get the 9:16 cut and everything else the 16:9 cut; rotating
+ * mid-play swaps the stream and keeps the position.
  * Keyboard: Space/K play · ←/→ 5 s · J/L 10 s · ↑/↓ volume · M mute · F fullscreen · C captions · 0–9 jump · Esc close
  */
-interface Props { playbackId: string; assetId?: string; title: string; eyebrow: string; label: string }
-const { playbackId, title, eyebrow } = Astro.props;
+interface Props { playbackId: string; portraitPlaybackId?: string; assetId?: string; title: string; eyebrow: string; label: string }
+const { playbackId, portraitPlaybackId, title, eyebrow } = Astro.props;
 const poster = `https://image.mux.com/${playbackId}/thumbnail.webp?width=1920&time=0`;
 ---
-<dialog class="vt" data-theatre data-playback-id={playbackId} aria-label={`Video: ${title}`}>
+<dialog class="vt" data-theatre data-playback-id={playbackId} data-portrait-id={portraitPlaybackId} aria-label={`Video: ${title}`}>
   <div class="vt__bg" data-bg aria-hidden="true"></div>
 
   <header class="vt__top" data-chrome>
@@ -164,6 +166,10 @@ const poster = `https://image.mux.com/${playbackId}/thumbnail.webp?width=1920&ti
                position: relative; align-self: center; justify-self: center; width: var(--w); aspect-ratio: 16 / 9; background: #000; overflow: hidden; isolation: isolate;
                box-shadow: 0 40px 120px -40px rgb(0 0 0 / .8), 0 0 0 1px rgb(255 255 255 / .06); }
   .vt__stage:fullscreen { width: 100%; height: 100%; aspect-ratio: auto; box-shadow: none; }
+  /* 9:16 cut on phones held upright: as tall as the screen allows below the top bar */
+  .vt__stage.is-portrait { --w: min(100%, calc((100svh - 96px) * 9 / 16)); aspect-ratio: 9 / 16; }
+  .vt__stage.is-portrait .vt__thumb { width: 84px; aspect-ratio: 9 / 16; }
+  .vt__stage.is-portrait .vt__ui { padding-top: 72px; padding-bottom: 14px; }
   .vt__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000; }
   .vt__video::cue { font-family: var(--font-body); font-size: clamp(14px, 1.6vw, 22px); background: rgb(20 8 2 / .82); color: #fff; }
   .vt__hit { position: absolute; inset: 0; z-index: 1; background: none; border: 0; cursor: pointer; }
@@ -297,11 +303,22 @@ const poster = `https://image.mux.com/${playbackId}/thumbnail.webp?width=1920&ti
 
   @media (max-width: 760px) {
     .vt { padding: 12px; }
-    .vt__stage { --w: 100%; }
+    .vt__stage:not(.is-portrait) { --w: 100%; }
+    .vt:has(.is-portrait) { grid-template-rows: auto 1fr; gap: 10px; }
+    .vt:has(.is-portrait) .vt__foot { display: none; }
     .vt__btn--sm, .vt__vol-range, [data-pip], .vt__menu-wrap[data-quality-wrap] { display: none; }   /* adaptive quality on phones */
     .vt__time { margin-left: 4px; font-size: 0.75rem; }
     .vt__thumb { width: 128px; }
     .vt__ui { padding-top: 36px; }
+  }
+  /* short screens (phones in landscape): drop the chrome rows and let the 16:9 stage use the full height */
+  @media (max-height: 520px) {
+    .vt { padding: 8px 12px; grid-template-rows: 1fr; }
+    .vt__top { position: absolute; z-index: 6; top: 10px; right: 14px; left: auto; }
+    .vt__meta, .vt__foot { display: none; }
+    .vt__close { padding: 7px 10px; background: rgb(20 8 2 / .55); }
+    .vt__stage:not(.is-portrait) { --w: min(100%, calc((100svh - 16px) * 16 / 9)); }
+    .vt__ui { padding-top: 28px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .vt__ring, .vt__dot { animation: none; }
