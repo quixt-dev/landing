@@ -13,12 +13,12 @@ const { specs } = Astro.props as { specs: { label: string; value: string }[] };
   .spec__cell + .spec__cell { padding-left: 24px; border-left: 1.5px solid var(--line); }
   dt { font-size: var(--fs-xs); color: var(--brand-ink); }
   dd { font-family: var(--font-display); font-size: clamp(1.05rem, 1.35vw, 1.1875rem); line-height: 1.35; }
-  /* Phones: 2-up grid. Row rules start from the second row (the first sits on the sheet's own top rule), a hairline splits the columns, and an odd last cell spans the full width. */
+  /* Phones: 2-up grid. Row rules start from the second row (the first sits on the sheet's own top rule), a hairline splits the columns, and an odd last cell spans the full width, centred. */
   @media (max-width: 760px) {
     .spec { grid-template-columns: 1fr 1fr; }
     .spec__cell, .spec__cell + .spec__cell { padding: 18px 0; border-left: 0; }
     .spec__cell + .spec__cell:nth-child(even) { padding-left: 16px; border-left: 1px solid var(--line-soft); }
     .spec__cell:nth-child(n+3) { border-top: 1px solid var(--line-soft); }
-    .spec__cell:last-child:nth-child(odd) { grid-column: 1 / -1; }
+    .spec__cell:last-child:nth-child(odd) { grid-column: 1 / -1; justify-items: center; text-align: center; }
   }
 </style>
