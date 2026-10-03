@@ -4,9 +4,10 @@
  * (see `assets.run_worker_first` in wrangler.jsonc).
  *
  *   POST /api/brief  ← the 4-step project brief on /contact/ (multipart, optional attachments)
- *   POST /api/book   ← the "Book a free 30-min call" card on /contact/
+ *   POST /api/book   ← the "Book a free 30-min call" card on /contact/: books the slot on Cal.com
+ *                      (which sends the Google Meet invite) and emails INBOX a heads-up
  *
- * Both send a formatted email to INBOX via the `send_email` binding. Forms work without JS
+ * Emails go to INBOX via the `send_email` binding. Forms work without JS
  * (303 redirect to /contact/thanks/); with JS they post with `Accept: application/json`.
  */
 import { buildOptions, stages } from '../src/data/contact';
@@ -17,7 +18,12 @@ interface Env {
   ASSETS: { fetch(req: Request): Promise<Response> };
   INBOX: string;
   SENDER: string;
+  CAL_USERNAME: string;
+  CAL_EVENT: string;
 }
+
+const CAL_API = 'https://api.cal.com/v2';
+const isTz = (tz: string) => { try { new Intl.DateTimeFormat('en', { timeZone: tz }); return true; } catch { return false; } };
 
 const MAX_ATTACH_BYTES = 3.5 * 1024 * 1024; // send() caps the whole message at 5 MiB; base64 adds ~33%
 const MIN_FILL_MS = 2500; // humans don't finish a form in under 2.5 s
@@ -71,6 +77,7 @@ async function handle(kind: 'brief' | 'book', request: Request, env: Env): Promi
   ];
 
   let subject: string, intro: string, rows: Row[], message = '';
+  let bookedStart = '', meetingUrl = '';
   const attachments: { content: ArrayBuffer; filename: string; type: string; disposition: 'attachment' }[] = [];
   const skipped: string[] = [];
 
@@ -95,15 +102,24 @@ async function handle(kind: 'brief' | 'book', request: Request, env: Env): Promi
     subject = `New project brief · ${name} · ${build}`;
     intro = `${name} sent a project brief from quixt.dev.`;
   } else {
-    const date = str('date', 20), time = str('time', 10);
-    const when = date ? `${new Date(`${date}T00:00:00`).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · ${time} IST` : '—';
-    message = str('note', 1000);
-    rows = [['Name', name], ['Email', email], ['Requested slot', when], ['Visitor timezone', str('tz', 60)]];
-    subject = `Call request · ${name} · ${date ? `${date} ${time} IST` : 'time TBD'}`;
-    intro = `${name} asked for a free 30-minute discovery call.`;
+    // The card sends the exact slot start (ISO, from Cal.com slots) and the visitor's timezone.
+    const startAt = new Date(str('start', 40));
+    if (Number.isNaN(+startAt) || +startAt < Date.now()) return reply(request, false, 'Please pick a time from the calendar.', 422);
+    const tz = str('tz', 60), timeZone = isTz(tz) ? tz : 'Asia/Kolkata';
+    const booked = await calBook(env, { start: startAt.toISOString(), name, email, timeZone });
+    if (!booked.ok) return reply(request, false, booked.error, booked.status);
+    bookedStart = booked.start; meetingUrl = booked.meetingUrl;
+    const when = (zone: string) => startAt.toLocaleString('en-GB', { timeZone: zone, weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+    rows = [
+      ['Name', name], ['Email', email], ['Booked for', `${when('Asia/Kolkata')} IST`],
+      ['Their time', timeZone === 'Asia/Kolkata' || timeZone === 'Asia/Calcutta' ? '' : `${when(timeZone)} (${timeZone})`],
+      ['Meeting', booked.meetingUrl || 'Google Meet link is in the Cal.com invite'], ['Cal.com booking', booked.uid],
+    ];
+    subject = `Call booked · ${name} · ${when('Asia/Kolkata')} IST`;
+    intro = `${name} booked a free 30-minute discovery call. It's already on your calendar.`;
   }
 
-  await env.EMAIL.send({
+  const mail = {
     to: env.INBOX,
     from: { email: env.SENDER, name: 'Quixt Website' },
     replyTo: { email, name },
@@ -111,15 +127,46 @@ async function handle(kind: 'brief' | 'book', request: Request, env: Env): Promi
     html: renderHtml(intro, rows.filter(([, v]) => v), message, meta.filter(([, v]) => v)),
     text: renderText(intro, rows.filter(([, v]) => v), message, meta.filter(([, v]) => v)),
     ...(attachments.length ? { attachments } : {}),
-  });
+  };
+  if (kind === 'brief') await env.EMAIL.send(mail);
+  else {
+    // The booking already exists on Cal.com (and the invite is sent); a failed heads-up email must not undo that.
+    try { await env.EMAIL.send(mail); } catch (err) { console.error('booking notification failed', err); }
+  }
 
-  return reply(request, true);
+  return reply(request, true, undefined, 200, kind === 'book' ? { start: bookedStart, meetingUrl } : undefined);
+}
+
+/* ------------------------------------------------------------ Cal.com */
+type BookResult = { ok: true; uid: string; start: string; meetingUrl: string } | { ok: false; status: number; error: string };
+async function calBook(env: Env, b: { start: string; name: string; email: string; timeZone: string }): Promise<BookResult> {
+  const res = await fetch(`${CAL_API}/bookings`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'cal-api-version': '2024-08-13' },
+    body: JSON.stringify({
+      start: b.start, eventTypeSlug: env.CAL_EVENT, username: env.CAL_USERNAME,
+      attendee: { name: b.name, email: b.email, timeZone: b.timeZone, language: 'en' },
+      metadata: { source: 'quixt.dev' },
+    }),
+  });
+  const data = (await res.json().catch(() => ({}))) as { status?: string; data?: unknown; error?: { message?: string } };
+  if (res.ok && data.status === 'success') {
+    const d = (Array.isArray(data.data) ? data.data[0] : data.data) as { uid?: string; start?: string; meetingUrl?: string; location?: string } | undefined;
+    const link = d?.meetingUrl || (d?.location?.startsWith('http') ? d.location : '');
+    return { ok: true, uid: d?.uid ?? '', start: d?.start ?? b.start, meetingUrl: link ?? '' };
+  }
+  const msg = String(data.error?.message ?? '');
+  console.error('cal booking failed', res.status, msg);
+  if (res.status === 409 || /available|already|booked|conflict|busy|slot/i.test(msg)) {
+    return { ok: false, status: 409, error: 'That time was just taken. Please pick another slot.' };
+  }
+  return { ok: false, status: 502, error: 'Couldn’t book that slot right now. Please try another time or email build@quixt.dev.' };
 }
 
 type Row = [string, string];
 
-function reply(request: Request, ok: boolean, error?: string, status = ok ? 200 : 400): Response {
-  if ((request.headers.get('Accept') ?? '').includes('application/json')) return json(ok ? { ok } : { ok, error }, status);
+function reply(request: Request, ok: boolean, error?: string, status = ok ? 200 : 400, extra?: Record<string, string>): Response {
+  if ((request.headers.get('Accept') ?? '').includes('application/json')) return json(ok ? { ok, ...extra } : { ok, error }, status);
   if (ok) return Response.redirect(new URL('/contact/thanks/', request.url).toString(), 303);
   return new Response(page(error ?? 'Something went wrong.'), { status, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
 }

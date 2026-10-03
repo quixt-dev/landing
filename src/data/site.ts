@@ -19,8 +19,12 @@ export const site = {
   phone: '+91 94227 99861',
   phoneHref: '+919422799861',
   whatsapp: 'https://wa.me/919422799861',
-  /** The booking card on /contact/ posts call requests to /api/book (see worker/index.ts). */
+  /** The booking card on /contact/ books via /api/book (Cal.com + team email, see worker/index.ts). */
   bookingUrl: '/contact/#book-a-call',
+  /** Cal.com discovery call: the booking card reads live slots from Cal.com's public API in the browser. */
+  cal: { username: 'quixt', event: 'discovery' },
+  /** Public Cal.com page for the same event — the no-JS / fallback route. */
+  calLink: 'https://cal.com/quixt/discovery',
   /** Handled by the Cloudflare Worker in worker/index.ts, which emails each brief to the team inbox. */
   formAction: '/api/brief',
   bookAction: '/api/book',

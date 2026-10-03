@@ -16,7 +16,9 @@
   ],
   "vars": {
     "INBOX": "lexifyrtechnologies@gmail.com",
-    "SENDER": "website@quixt.dev"
+    "SENDER": "website@quixt.dev",
+    "CAL_USERNAME": "quixt",
+    "CAL_EVENT": "discovery"
   },
   "send_email": [
     { "name": "EMAIL", "allowed_destination_addresses": ["lexifyrtechnologies@gmail.com"] }

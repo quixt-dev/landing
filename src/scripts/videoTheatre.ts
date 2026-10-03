@@ -366,6 +366,7 @@ export function createTheatre(dlg: HTMLDialogElement): Theatre {
     const on = document.fullscreenElement === stage;
     stage.classList.toggle('is-fs', on);
     fsBtn.ariaLabel = on ? 'Exit fullscreen' : 'Fullscreen';
+    wake(); // re-arm the idle timer for the new layout (keeps focus inside the dialog for keyboard shortcuts)
   });
 
   if (document.pictureInPictureEnabled) {
@@ -452,8 +453,17 @@ export function createTheatre(dlg: HTMLDialogElement): Theatre {
   function wake(stay = false) {
     stage.classList.add('is-ui'); stage.classList.remove('is-idle');
     clearTimeout(idleT);
-    if (!stay && !video.paused) idleT = window.setTimeout(() => {
-      if (video.paused || dragging || menus.some((m) => !m.hidden) || ui.matches(':hover') || ui.contains(document.activeElement) && document.activeElement !== toggleBtn) return;
+    if (!stay && !video.paused) armIdle();
+  }
+  // Hide the controls once the viewer stops interacting. While they're busy (dragging, a menu open, the pointer
+  // resting on the bar, keyboard focus in the bar) check again later instead of giving up: a mouse click leaves
+  // focus on the clicked button (e.g. fullscreen), which used to keep the controls up for good.
+  function armIdle() {
+    clearTimeout(idleT);
+    idleT = window.setTimeout(() => {
+      if (video.paused) return;
+      const busy = dragging || menus.some((m) => !m.hidden) || ui.matches(':hover') || !!ui.querySelector(':focus-visible');
+      if (busy) { armIdle(); return; }
       stage.classList.remove('is-ui'); stage.classList.add('is-idle');
     }, IDLE_MS);
   }
