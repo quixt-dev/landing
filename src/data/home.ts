@@ -1,6 +1,6 @@
 export const hero = {
   title: 'We Build\nDigital Products\nThat Power Growth',
-  lead: 'Quixt Is A Development Agency Crafting High-Performance Websites, Apps, And Software Solutions For Startups And Growing Businesses.',
+  lead: 'Quixt Is A Design And Engineering Agency Crafting High-Performance Websites, Apps, And Software Solutions For Startups And Growing Businesses.',
 };
 
 /** Studio film behind the hero photo. Hosted on Mux (public playback ID), played in the custom theatre player. */
@@ -20,7 +20,7 @@ export const about = [
   {
     id: 'agency',
     graphic: 'globe' as const,
-    text: 'We Are **World Class Development Agency.** MVPs To Enterprise Platforms, We Help Businesses Transform Ideas Into **Real-World Technology.**',
+    text: 'We Are A **World Class Design & Engineering Agency.** MVPs To Enterprise Platforms, We Help Businesses Transform Ideas Into **Real-World Technology.**',
   },
   {
     id: 'team',

@@ -339,7 +339,7 @@ Photography is from [Unsplash](https://unsplash.com), used under the Unsplash Li
 
 ## License
 
-The source code is released under the [Apache License 2.0](LICENSE). The Quixt name, logo and case-study content are not covered by this license and remain the property of Quixt Studio.
+The source code is released under the [Apache License 2.0](LICENSE). The Quixt name, logo and case-study content are not covered by this license and remain the property of Lexifyr Technologies Pvt. Ltd.
 
 <br>
 

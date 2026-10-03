@@ -3,7 +3,7 @@
   "type": "module",
   "version": "1.0.0",
   "private": true,
-  "description": "Marketing website for Quixt — a development agency building websites, apps and SaaS products.",
+  "description": "Marketing website for Quixt — a design and engineering agency building websites, apps and SaaS products.",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",

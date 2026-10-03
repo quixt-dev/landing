@@ -7,14 +7,14 @@ export const site = {
   name: 'Quixt',
   /** Fallback site names for Google, in order of preference. Never the bare domain: we want "Quixt" shown. */
   alternateNames: ['Quixt Studio'],
-  legalName: 'Quixt Studio',
+  legalName: 'Lexifyr Technologies Pvt. Ltd.',
   url: 'https://quixt.dev',
   locale: 'en_IN',
   language: 'en',
   tagline: 'We Build Digital Products That Power Growth',
   description:
-    'Quixt is a design and software development agency in Guwahati, Assam, India that designs and builds high-performance websites, mobile apps, SaaS products and custom software for startups and growing businesses worldwide.',
-  shortDescription: 'Development agency crafting websites, apps and software for startups and growing businesses.',
+    'Quixt is a design and engineering agency in Guwahati, Assam, India that designs and builds high-performance websites, mobile apps, SaaS products and custom software for startups and growing businesses worldwide.',
+  shortDescription: 'Design and engineering agency crafting websites, apps and software for startups and growing businesses.',
   email: 'build@quixt.dev',
   phone: '+91 94227 99861',
   phoneHref: '+919422799861',
