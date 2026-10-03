@@ -33,4 +33,5 @@ const { cs } = Astro.props as { cs: CaseStudy };
   .chip--primary { background: var(--brand); border-color: var(--brand); color: var(--white); }
   .chip--primary::before { background: var(--white); }
   @media (min-width: 1100px) { .row { grid-template-columns: 1fr 746px; } }
+  @media (max-width: 600px) { .group { grid-template-columns: 1fr; gap: 12px; padding: 18px 0; } }   /* phones: label above its chips, chips get the full width */
 </style>
