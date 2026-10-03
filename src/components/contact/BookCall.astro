@@ -1,8 +1,11 @@
 ---
 /**
- * "Book a free call" card. Renders a static month at build time; a small script
- * re-renders the current month and keeps the picked date/time in hidden fields.
- * Posts to /api/book (worker/index.ts), which emails the request to the team inbox.
+ * "Book a free call" card, wired to Cal.com (the `discovery` event on cal.com/quixt).
+ * Live free slots come straight from Cal.com's public API (it allows browser requests), so the card works
+ * the same under `astro dev` and in production. A pick books via /api/book (worker/index.ts): Cal.com sends
+ * the calendar invite with the Google Meet link and the team inbox gets a heads-up. Without the Worker
+ * (e.g. `astro dev`) it books directly on Cal.com instead. Slots refresh when the month changes, every
+ * minute while the tab is visible, and when the tab comes back into view.
  */
 import { site } from '../../data/site';
 const now = new Date();
@@ -10,14 +13,13 @@ const y = now.getFullYear(), m = now.getMonth();
 const first = (new Date(y, m, 1).getDay() + 6) % 7; // Monday-first
 const days = new Date(y, m + 1, 0).getDate();
 const monthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-const slots = ['10:00', '11:30', '15:00', '17:30'];
 ---
 <section id="book-a-call" class="book on-brand" aria-labelledby="book-title">
   <p class="eyebrow">Prefer To Talk?</p>
   <h3 id="book-title" class="book__title">Book A Free<br />30-Min Call</h3>
   <p class="book__lead">No Preparation Needed. Bring Your Idea. We’ll Bring The Questions.</p>
   <form class="cal" data-cal action={site.bookAction} method="post">
-    <input type="hidden" name="date" value="" data-date />
+    <input type="hidden" name="start" value="" data-start />
     <input type="hidden" name="tz" value="" data-tz />
     <input type="hidden" name="_t" value="" data-started />
     <div class="hp" aria-hidden="true"><label>Leave This Empty <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" /></label></div>
@@ -27,89 +29,189 @@ const slots = ['10:00', '11:30', '15:00', '17:30'];
       {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((d) => <span class="cal__dow" aria-hidden="true">{d}</span>)}
       <div class="cal__days" data-days>
         {Array.from({ length: first }).map(() => <span></span>)}
-        {Array.from({ length: days }, (_, i) => { const wd = (first + i) % 7; return <span class:list={['cal__d', wd > 4 && 'is-off']}>{i + 1}</span>; })}
+        {Array.from({ length: days }, (_, i) => <span class="cal__d is-off">{i + 1}</span>)}
       </div>
     </div>
-    <p class="cal__sel" data-sel>Pick A Weekday</p>
-    <div class="slots" role="radiogroup" aria-label="Choose a time">
-      {slots.map((s, i) => <label class="slot"><input type="radio" name="time" value={s} checked={i === 2} /><span>{s}</span></label>)}
-    </div>
-    <p class="cal__tz" data-local>Times In IST</p>
+    <p class="cal__sel" data-sel>Loading Available Times…</p>
+    <div class="slots" data-slots role="radiogroup" aria-label="Choose a time"></div>
+    <p class="cal__tz" data-local>Live Availability · 30 Minutes · Google Meet</p>
     <div class="who">
       <label class="who__f"><span>Your Name</span><input name="name" type="text" autocomplete="name" placeholder="e.g. Priya Sharma" required /></label>
       <label class="who__f"><span>Email</span><input name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@company.com" required /></label>
     </div>
-    <button type="submit" class="book__btn" data-book data-fill>Request A Call <span aria-hidden="true">→</span></button>
+    <button type="submit" class="book__btn" data-book data-fill disabled>Pick A Time <span aria-hidden="true">→</span></button>
     <p class="book__status" data-status role="status" aria-live="polite" hidden></p>
+    <p class="cal__alt">Or Book On <a href={site.calLink} target="_blank" rel="noopener">Cal.com ↗</a></p>
   </form>
   <div class="booked" data-booked tabindex="-1" hidden>
     <span class="booked__mark" aria-hidden="true">✓</span>
-    <p class="booked__title">Request Sent.</p>
-    <p class="booked__text" data-booked-text>We’ll Confirm Your Slot By Email Within A Few Hours, With A Calendar Invite And A Video Link.</p>
+    <p class="booked__title">You’re Booked.</p>
+    <p class="booked__text" data-booked-text>A Calendar Invite With The Google Meet Link Is On Its Way To Your Inbox.</p>
   </div>
 </section>
 <script>
+  import { site } from '../../data/site';
   const cal = document.querySelector<HTMLFormElement>('[data-cal]');
   if (cal) {
-    const daysEl = cal.querySelector<HTMLElement>('[data-days]')!, monthEl = cal.querySelector('[data-month]')!, selEl = cal.querySelector('[data-sel]')!, btn = cal.querySelector<HTMLButtonElement>('[data-book]')!;
-    const dateEl = cal.querySelector<HTMLInputElement>('[data-date]')!, localEl = cal.querySelector<HTMLElement>('[data-local]')!, status = cal.querySelector<HTMLElement>('[data-status]')!;
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-    cal.querySelector<HTMLInputElement>('[data-tz]')!.value = tz;
-    cal.querySelector<HTMLInputElement>('[data-started]')!.value = String(Date.now());
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    let view = new Date(today.getFullYear(), today.getMonth(), 1);
-    let picked: Date | null = null;
-    const fmt = (d: Date) => d.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long' });
-    const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    const slot = () => cal.querySelector<HTMLInputElement>('input[name="time"]:checked')?.value ?? '';
-    const sync = () => {
-      selEl.textContent = picked ? fmt(picked) : 'Pick A Weekday';
-      dateEl.value = picked ? iso(picked) : '';
-      btn.innerHTML = picked ? `Request ${picked.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })} · ${slot()} <span aria-hidden="true">→</span>` : 'Request A Call <span aria-hidden="true">→</span>';
-      // Show the slot in the visitor's own timezone when it differs from IST.
-      const t = slot(), d = picked ?? today;
-      const at = new Date(`${iso(d)}T${t}:00+05:30`);
-      const local = at.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
-      localEl.textContent = tz === 'Asia/Kolkata' || tz === 'Asia/Calcutta' ? 'Times In IST' : `Times In IST · ${t} IST Is ${local} For You`;
-    };
-    const render = () => {
+    const $ = <T extends Element = HTMLElement>(s: string) => cal.querySelector<T>(s)!;
+    const daysEl = $('[data-days]'), monthEl = $('[data-month]'), selEl = $('[data-sel]'), slotsEl = $('[data-slots]');
+    const btn = $<HTMLButtonElement>('[data-book]'), startEl = $<HTMLInputElement>('[data-start]'), localEl = $('[data-local]'), status = $('[data-status]');
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
+    const isIst = tz === 'Asia/Kolkata' || tz === 'Asia/Calcutta';
+    $<HTMLInputElement>('[data-tz]').value = tz;
+    $<HTMLInputElement>('[data-started]').value = String(Date.now());
+
+    const CAL_API = 'https://api.cal.com/v2';
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const ymd = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    // "Today" in the visitor's timezone; slot keys from the API are dates in that same timezone.
+    const todayKey = new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date());
+    const [ty, tm] = todayKey.split('-').map(Number);
+    const firstMonth = new Date(ty, tm - 1, 1);
+    let view = new Date(firstMonth);
+    let free: Record<string, string[]> = {};      // date → ISO slot starts
+    const loaded = new Set<string>();             // months fetched (yyyy-mm)
+    let day = '', pick = '', loading = false, failed = false;
+
+    const timeOf = (iso: string) => new Date(iso).toLocaleTimeString([], { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false });
+    const istOf = (iso: string) => new Date(iso).toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' });
+    const dayLabel = (key: string) => new Date(`${key}T12:00:00`).toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long' });
+    const short = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { timeZone: tz, weekday: 'short', day: 'numeric', month: 'short' });
+    const monthKey = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+
+    // Loads one month of free slots. Retries twice with a short backoff before showing an error, and never
+    // changes the visible month: a failed load stays on the month the visitor is looking at.
+    async function fetchMonth(d: Date, force = false) {
+      const key = monthKey(d);
+      if (loaded.has(key) && !force) return;
+      const start = ymd(+d === +firstMonth ? new Date(ty, tm - 1, Number(todayKey.slice(8))) : d);
+      const end = ymd(new Date(d.getFullYear(), d.getMonth() + 1, 0));
+      const q = new URLSearchParams({ username: site.cal.username, eventTypeSlug: site.cal.event, start, end, timeZone: tz });
+      loading = true; render();
+      let got: Record<string, { start: string }[]> | null = null;
+      for (const wait of [0, 1500, 4000]) {
+        if (wait) await new Promise((r) => setTimeout(r, wait));
+        try {
+          const res = await fetch(`${CAL_API}/slots?${q}`, { cache: 'no-store', headers: { 'cal-api-version': '2024-09-04' } });
+          const data = await res.json();
+          if (res.ok && data?.data && typeof data.data === 'object') { got = data.data; break; }
+        } catch { /* network error: retry */ }
+      }
+      loading = false;
+      if (monthKey(view) !== key) return; // the visitor moved on while this was loading
+      if (!got) { failed = true; render(); return; }
+      failed = false; loaded.add(key);
+      for (const k of Object.keys(free)) if (k.startsWith(key)) delete free[k];
+      const soon = Date.now() + 5 * 60_000; // hide slots starting in the next 5 minutes
+      for (const [k, list] of Object.entries(got)) {
+        const ok = list.map((x) => x.start).filter((t) => Date.parse(t) > soon);
+        if (ok.length) free[k] = ok;
+      }
+      if (day && !free[day]) { day = ''; pick = ''; }
+      if (pick && !(free[day] ?? []).includes(pick)) pick = '';
+      if (!day) day = Object.keys(free).sort().find((k) => k.startsWith(key)) ?? '';
+      render();
+    }
+    const hasMonth = (d: Date) => Object.keys(free).some((k) => k.startsWith(monthKey(d)));
+
+    function render() {
       monthEl.textContent = view.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
       const lead = (view.getDay() + 6) % 7, n = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
       daysEl.innerHTML = '';
       for (let i = 0; i < lead; i++) daysEl.append(document.createElement('span'));
       for (let d = 1; d <= n; d++) {
-        const date = new Date(view.getFullYear(), view.getMonth(), d), wd = (date.getDay() + 6) % 7;
+        const key = `${monthKey(view)}-${pad(d)}`, has = !!free[key]?.length;
         const b = document.createElement('button'); b.type = 'button'; b.textContent = String(d); b.className = 'cal__d';
-        const off = wd > 4 || date <= today;
-        if (off) { b.disabled = true; b.classList.add('is-off'); }
-        if (picked && +picked === +date) { b.classList.add('is-sel'); b.setAttribute('aria-pressed', 'true'); }
-        b.setAttribute('aria-label', fmt(date) + (off ? ' (unavailable)' : ''));
-        b.addEventListener('click', () => { picked = date; render(); sync(); });
+        if (!has) { b.disabled = true; b.classList.add('is-off'); }
+        if (key === day) { b.classList.add('is-sel'); b.setAttribute('aria-pressed', 'true'); }
+        b.setAttribute('aria-label', dayLabel(key) + (has ? `, ${free[key].length} times free` : ' (unavailable)'));
+        b.addEventListener('click', () => { day = key; pick = ''; render(); });
         b.style.setProperty('--i', String(lead + d)); daysEl.append(b);
       }
-    };
-    // Pre-select the next available weekday
-    const next = new Date(today); do { next.setDate(next.getDate() + 1); } while ([0, 6].includes(next.getDay()));
-    picked = next; view = new Date(next.getFullYear(), next.getMonth(), 1);
-    cal.querySelector('[data-prev]')!.addEventListener('click', () => { const p = new Date(view.getFullYear(), view.getMonth() - 1, 1); if (p >= new Date(today.getFullYear(), today.getMonth(), 1)) { view = p; render(); } });
-    cal.querySelector('[data-next]')!.addEventListener('click', () => { view = new Date(view.getFullYear(), view.getMonth() + 1, 1); render(); });
-    cal.addEventListener('change', sync);
-    render(); sync();
+      const list = day ? free[day] ?? [] : [];
+      slotsEl.innerHTML = '';
+      list.forEach((iso) => {
+        const l = document.createElement('label'); l.className = 'slot';
+        const r = document.createElement('input'); r.type = 'radio'; r.name = 'slot'; r.value = iso; r.checked = iso === pick;
+        r.addEventListener('change', () => { pick = iso; sync(); });
+        const sp = document.createElement('span'); sp.textContent = timeOf(iso);
+        l.append(r, sp); slotsEl.append(l);
+      });
+      selEl.replaceChildren();
+      if (loading && !list.length) selEl.textContent = 'Loading Available Times…';
+      else if (failed && !hasMonth(view)) {
+        const retry = document.createElement('button');
+        retry.type = 'button'; retry.className = 'cal__retry'; retry.textContent = 'Try Again';
+        retry.addEventListener('click', () => fetchMonth(view, true));
+        selEl.append('Couldn’t Load Times. ', retry);
+      }
+      else if (!day) selEl.textContent = hasMonth(view) ? 'Pick A Day' : 'No Free Times This Month. Try The Next One.';
+      else selEl.textContent = dayLabel(day);
+      sync();
+    }
+
+    function sync() {
+      startEl.value = pick;
+      btn.disabled = !pick;
+      btn.innerHTML = pick ? `Book ${short(pick)} · ${timeOf(pick)} <span aria-hidden="true">→</span>` : 'Pick A Time <span aria-hidden="true">→</span>';
+      localEl.textContent = isIst ? 'Times In IST · 30 Minutes · Google Meet'
+        : `Times In Your Timezone (${tz.replace(/_/g, ' ')})${pick ? ` · ${istOf(pick)} IST For Us` : ''} · 30 Min · Google Meet`;
+    }
+
+    const go = (d: Date) => { view = d; day = ''; pick = ''; failed = false; render(); fetchMonth(view); };
+    $('[data-prev]').addEventListener('click', () => { const p = new Date(view.getFullYear(), view.getMonth() - 1, 1); if (p >= firstMonth) go(p); });
+    $('[data-next]').addEventListener('click', () => go(new Date(view.getFullYear(), view.getMonth() + 1, 1)));
+
+    // Keep it live: refresh the visible month every minute while the tab is visible, and when the tab comes back.
+    const refresh = () => { if (document.visibilityState === 'visible' && !cal.hidden) fetchMonth(view, true); };
+    setInterval(refresh, 60_000);
+    document.addEventListener('visibilitychange', refresh);
+    // Always open on the current month. Only if it loaded fine and has no free time left (e.g. the last days of
+    // the month) do we open the next month — a failed load never moves the calendar.
+    fetchMonth(view).then(() => { if (!failed && !loading && monthKey(view) === monthKey(firstMonth) && !hasMonth(firstMonth)) go(new Date(ty, tm, 1)); });
+
+    // Fallback when /api/book isn't there (astro dev): book straight on Cal.com. Cal.com still emails the invite.
+    async function bookDirect(start: string) {
+      const fd = new FormData(cal!);
+      const res = await fetch(`${CAL_API}/bookings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'cal-api-version': '2024-08-13' },
+        body: JSON.stringify({
+          start: new Date(start).toISOString(), eventTypeSlug: site.cal.event, username: site.cal.username,
+          attendee: { name: String(fd.get('name') ?? ''), email: String(fd.get('email') ?? ''), timeZone: tz, language: 'en' },
+          metadata: { source: 'quixt.dev' },
+        }),
+      });
+      const body = await res.json().catch(() => ({}));
+      const ok = res.ok && body.status === 'success';
+      const msg = String(body?.error?.message ?? '');
+      const taken = !ok && /available|already|booked|conflict|busy|slot/i.test(msg);
+      return {
+        res: { ok, status: ok ? 200 : taken ? 409 : res.status } as Response,
+        data: ok ? { ok: true } : { ok: false, error: taken ? 'That Time Was Just Taken. Please Pick Another Slot.' : 'Couldn’t Book That Slot. Please Try Another Time.' },
+      };
+    }
 
     const booked = document.querySelector<HTMLElement>('[data-booked]')!;
     cal.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!pick) return;
       if (!cal.reportValidity()) return;
-      const label = btn.innerHTML;
-      btn.disabled = true; btn.textContent = 'Sending…'; status.hidden = true;
+      const chosen = pick, label = btn.innerHTML;
+      btn.disabled = true; btn.textContent = 'Booking…'; status.hidden = true;
       try {
-        const res = await fetch(cal.action, { method: 'POST', body: new FormData(cal as HTMLFormElement), headers: { Accept: 'application/json' } });
-        const data = await res.json().catch(() => ({ ok: false }));
-        if (!res.ok || !data.ok) throw new Error(data.error || 'Couldn’t Send Your Request. Please Try Again.');
-        if (picked) booked.querySelector('[data-booked-text]')!.textContent = `You Asked For ${fmt(picked)} At ${slot()} IST. We’ll Confirm By Email Within A Few Hours, With A Calendar Invite And A Video Link.`;
+        let res = await fetch(cal.action, { method: 'POST', body: new FormData(cal), headers: { Accept: 'application/json' } });
+        let data = await res.json().catch(() => ({ ok: false }));
+        if (res.status === 404 || res.status === 405) ({ res, data } = await bookDirect(chosen));
+        if (!res.ok || !data.ok) {
+          if (res.status === 409) fetchMonth(view, true);
+          throw new Error(data.error || 'Couldn’t Book That Slot. Please Try Another Time.');
+        }
+        const whenLocal = `${new Date(chosen).toLocaleDateString('en-US', { timeZone: tz, weekday: 'long', day: 'numeric', month: 'long' })} At ${timeOf(chosen)}${isIst ? ' IST' : ` (${tz.replace(/_/g, ' ')})`}`;
+        booked.querySelector('[data-booked-text]')!.textContent = `See You ${whenLocal}. A Calendar Invite With The Google Meet Link Is On Its Way To Your Inbox.`;
         cal.hidden = true; booked.hidden = false; booked.focus({ preventScroll: true });
       } catch (err) {
-        status.textContent = (err as Error).message || 'Couldn’t Send Your Request. Please Email build@quixt.dev.'; status.hidden = false;
+        status.textContent = (err as Error).message || `Couldn’t Book That Slot. Please Email ${site.email}.`; status.hidden = false;
         btn.disabled = false; btn.innerHTML = label;
       }
     });
@@ -136,12 +238,14 @@ const slots = ['10:00', '11:30', '15:00', '17:30'];
   @media (prefers-reduced-motion: reduce) { .cal__days :global(.cal__d) { animation: none; } }
   .cal__days :global(.cal__d.is-sel) { transform: scale(1.06); box-shadow: 0 0 0 4px rgb(255 255 255 / .18); background: var(--white); color: var(--brand); font-weight: 500; }
   .cal__sel { margin: 20px 0 10px; font-weight: 500; font-size: 0.8125rem; }
-  .slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-  .slot input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-  .slot span { transition: background-color .35s, color .3s, transform .45s cubic-bezier(.34,1.56,.64,1); display: block; text-align: center; padding: 11px 0; border: 1.2px solid rgb(255 255 255 / .35); background: rgb(255 255 255 / .08); font-weight: 500; font-size: 0.84rem; cursor: pointer; }
-  .slot:hover span { transform: translateY(-3px); }
-  .slot:has(input:checked) span { background: var(--white); color: var(--brand); border-color: var(--white); }
-  .slot:has(input:focus-visible) span { outline: 2px solid var(--white); outline-offset: 2px; }
+  .slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-height: 196px; overflow-y: auto; padding: 4px 4px 2px 0; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / .35) transparent; }
+  .slots:empty { display: none; }
+  .slots :global(.slot input) { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .slots :global(.slot) { display: block; }
+  .slots :global(.slot span) { transition: background-color .35s, color .3s, transform .45s cubic-bezier(.34,1.56,.64,1); display: block; text-align: center; padding: 11px 0; border: 1.2px solid rgb(255 255 255 / .35); background: rgb(255 255 255 / .08); font-weight: 500; font-size: 0.84rem; cursor: pointer; }
+  .slots :global(.slot:hover span) { transform: translateY(-3px); }
+  .slots :global(.slot:has(input:checked) span) { background: var(--white); color: var(--brand); border-color: var(--white); }
+  .slots :global(.slot:has(input:focus-visible) span) { outline: 2px solid var(--white); outline-offset: 2px; }
   .cal__tz { margin-top: 10px; font-size: 0.72rem; color: var(--on-brand-muted); }
   .book__btn { position: relative; overflow: hidden; isolation: isolate; margin-top: 22px; display: flex; justify-content: center; gap: 10px; padding: 16px; background: var(--white); color: var(--brand); font-weight: 500; font-size: 0.906rem; }
   .book__btn::before { content: ''; position: absolute; inset: -1px; z-index: -1; background: var(--cream-2); clip-path: circle(0% at var(--fx, 50%) var(--fy, 100%)); transition: clip-path .7s cubic-bezier(.16,1,.3,1); }
@@ -149,6 +253,11 @@ const slots = ['10:00', '11:30', '15:00', '17:30'];
   .book__btn span { display: inline-block; transition: transform .5s cubic-bezier(.16,1,.3,1); }
   .book__btn:hover span { transform: translateX(5px); }
   .hp { position: absolute; left: -9999px; }
+  .cal__retry { color: var(--white); text-decoration: underline; text-underline-offset: 3px; font: inherit; cursor: pointer; }
+  .cal__alt { margin-top: 12px; font-size: 0.72rem; color: var(--on-brand-muted); }
+  .cal__alt a { color: var(--white); text-decoration: underline; text-underline-offset: 3px; }
+  .book__btn:disabled:not([aria-busy]) { cursor: not-allowed; }
+  @media (max-width: 420px) { .slots { grid-template-columns: repeat(3, 1fr); } }
   .cal[hidden], .booked[hidden] { display: none; }
   .who { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 18px; }
   .who__f { display: grid; gap: 6px; font-size: 0.72rem; color: var(--on-brand-muted); }
