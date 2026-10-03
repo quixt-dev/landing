@@ -35,12 +35,12 @@ export const servicesIntro = {
   lead: 'Whatever You’re Dreaming Of Building, We’ll Help You Get There Faster, With Less Stress And A Product You’re Proud To Show The World.',
 };
 export const services: { title: string; slug: string; description: string; tags: string[]; icon: ServiceIcon }[] = [
-  { title: 'UI/UX & Product Design', slug: 'product-design', icon: 'pen', description: 'See Your Idea Come Alive Before A Single Line Of Code. Figma Designs And Clickable Prototypes For Websites, Apps And Dashboards Your Users Will Love.', tags: ['Figma', 'Design Systems', 'Prototypes', 'Dashboards'] },
-  { title: 'Web Development', slug: 'web-development', icon: 'asterisk', description: 'Your Website Is Your First Impression. We Make It Fast, Beautiful And Built To Turn Curious Visitors Into Customers Who Trust You.', tags: ['Next.Js', 'React', 'Webflow', 'Custom CMS'] },
-  { title: 'Mobile App Development', slug: 'mobile-app-development', icon: 'device', description: 'Live On Your Customers’ Home Screens. Smooth iOS And Android Apps People Open Every Day, Not The Ones They Delete.', tags: ['Flutter', 'React Native', 'Native Apps'] },
-  { title: 'SaaS Product Development', slug: 'saas-product-development', icon: 'sparkle', description: 'Stop Waiting For The Perfect Moment. Go From Idea To Your First Paying Customer With A SaaS Built To Grow As Fast As You Do.', tags: ['Product Architecture', 'MVPs', 'Subscriptions'] },
-  { title: 'Custom Software Solutions', slug: 'custom-software', icon: 'frame', description: 'Get Your Evenings Back. Software Shaped Around How Your Business Really Works, So The Busywork Finally Runs Itself.', tags: ['Enterprise Systems', 'CRM', 'ERP'] },
-  { title: 'Backend & API Development', slug: 'backend-api-development', icon: 'arcs', description: 'Sleep Well On Launch Day. Rock-Solid Backends That Stay Fast And Secure The Moment Your Big Break Brings The Traffic.', tags: ['Node.Js', 'REST APIs', 'Databases'] },
+  { title: 'UI/UX & Product Design', slug: 'product-design', icon: 'pen', description: 'See Your Idea Come Alive Before A Line Of Code. Figma Prototypes Users Will Love.', tags: ['Figma', 'Design Systems', 'Prototypes', 'Dashboards'] },
+  { title: 'Web Development', slug: 'web-development', icon: 'asterisk', description: 'Your Website Is Your First Impression. Fast, Beautiful And Built To Win Customers.', tags: ['Next.Js', 'React', 'Webflow', 'Custom CMS'] },
+  { title: 'Mobile App Development', slug: 'mobile-app-development', icon: 'device', description: 'Live On Your Customers’ Home Screens. iOS And Android Apps People Keep, Not Delete.', tags: ['Flutter', 'React Native', 'Native Apps'] },
+  { title: 'SaaS Product Development', slug: 'saas-product-development', icon: 'sparkle', description: 'Stop Waiting For The Perfect Moment. A SaaS That Takes You From Idea To Revenue.', tags: ['Product Architecture', 'MVPs', 'Subscriptions'] },
+  { title: 'Custom Software Solutions', slug: 'custom-software', icon: 'frame', description: 'Get Your Evenings Back. Software Shaped Around Your Business, So Busywork Runs Itself.', tags: ['Enterprise Systems', 'CRM', 'ERP'] },
+  { title: 'Backend & API Development', slug: 'backend-api-development', icon: 'arcs', description: 'Sleep Well On Launch Day. Rock-Solid Backends That Stay Fast When Traffic Arrives.', tags: ['Node.Js', 'REST APIs', 'Databases'] },
 ];
 
 export const process = {
