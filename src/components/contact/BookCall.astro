@@ -17,7 +17,7 @@ const monthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeri
 <section id="book-a-call" class="book on-brand" aria-labelledby="book-title">
   <p class="eyebrow">Prefer To Talk?</p>
   <h3 id="book-title" class="book__title">Book A Free<br />30-Min Call</h3>
-  <p class="book__lead">No Preparation Needed. Bring Your Idea. We’ll Bring The Questions.</p>
+  <p class="book__lead">No Preparation Needed. Bring Your Idea, I’ll Bring The Questions.</p>
   <form class="cal" data-cal action={site.bookAction} method="post">
     <input type="hidden" name="start" value="" data-start />
     <input type="hidden" name="tz" value="" data-tz />
@@ -155,7 +155,7 @@ const monthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeri
       btn.disabled = !pick;
       btn.innerHTML = pick ? `Book ${short(pick)} · ${timeOf(pick)} <span aria-hidden="true">→</span>` : 'Pick A Time <span aria-hidden="true">→</span>';
       localEl.textContent = isIst ? 'Times In IST · 30 Minutes · Google Meet'
-        : `Times In Your Timezone (${tz.replace(/_/g, ' ')})${pick ? ` · ${istOf(pick)} IST For Us` : ''} · 30 Min · Google Meet`;
+        : `Times In Your Timezone (${tz.replace(/_/g, ' ')})${pick ? ` · ${istOf(pick)} IST For Me` : ''} · 30 Min · Google Meet`;
     }
 
     const go = (d: Date) => { view = d; day = ''; pick = ''; failed = false; render(); fetchMonth(view); };
@@ -218,18 +218,18 @@ const monthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeri
   }
 </script>
 <style>
-  .book { background: var(--brand); padding: 32px; display: grid; gap: 10px; }
+  .book { background: var(--brand); padding: 32px; display: grid; gap: 8px; }
   .eyebrow { font-size: 0.8125rem; }
   .book__title { font-size: 2rem; line-height: 1.22; letter-spacing: var(--track-l); word-spacing: var(--words-l); }
-  .book__lead { font-size: 0.875rem; line-height: 1.57; color: var(--on-brand-muted); margin-bottom: 18px; }
-  .cal__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .book__lead { font-size: 0.875rem; line-height: 1.57; color: var(--on-brand-muted); margin-bottom: 16px; }
+  .cal__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
   .cal__month { font-weight: 500; }
   .cal__nav { display: flex; gap: 4px; }
   .cal__nav button { width: 32px; height: 32px; font-size: 1.1rem; color: var(--white); }
   .cal__nav button:hover { background: rgb(255 255 255 / .12); }
-  .cal__grid { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 6px; }
+  .cal__grid { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 8px; }
   .cal__dow { text-align: center; font-size: 0.7rem; color: var(--on-brand-muted); padding-bottom: 8px; }
-  .cal__days { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .cal__days { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
   .cal__days :global(.cal__d) { animation: day-in .6s cubic-bezier(.16,1,.3,1) both; animation-delay: calc(var(--i, 0) * 12ms); transition: background-color .3s, color .3s, transform .4s cubic-bezier(.34,1.56,.64,1); height: 38px; display: grid; place-items: center; background: rgb(255 255 255 / .08); color: var(--white); font-size: 0.8125rem; }
   .cal__days :global(button.cal__d:hover) { background: rgb(255 255 255 / .2); }
   .cal__days :global(.cal__d.is-off) { background: none; color: rgb(255 255 255 / .45); cursor: default; }
@@ -237,17 +237,17 @@ const monthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeri
   @keyframes day-in { from { opacity: 0; transform: translateY(8px) scale(.9); } }
   @media (prefers-reduced-motion: reduce) { .cal__days :global(.cal__d) { animation: none; } }
   .cal__days :global(.cal__d.is-sel) { transform: scale(1.06); box-shadow: 0 0 0 4px rgb(255 255 255 / .18); background: var(--white); color: var(--brand); font-weight: 500; }
-  .cal__sel { margin: 20px 0 10px; font-weight: 500; font-size: 0.8125rem; }
+  .cal__sel { margin: 16px 0 8px; font-weight: 500; font-size: 0.8125rem; }
   .slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-height: 196px; overflow-y: auto; padding: 4px 4px 2px 0; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / .35) transparent; }
   .slots:empty { display: none; }
   .slots :global(.slot input) { position: absolute; opacity: 0; width: 1px; height: 1px; }
   .slots :global(.slot) { display: block; }
-  .slots :global(.slot span) { transition: background-color .35s, color .3s, transform .45s cubic-bezier(.34,1.56,.64,1); display: block; text-align: center; padding: 11px 0; border: 1.2px solid rgb(255 255 255 / .35); background: rgb(255 255 255 / .08); font-weight: 500; font-size: 0.84rem; cursor: pointer; }
+  .slots :global(.slot span) { transition: background-color .35s, color .3s, transform .45s cubic-bezier(.34,1.56,.64,1); display: block; text-align: center; padding: 12px 0; border: 1.2px solid rgb(255 255 255 / .35); background: rgb(255 255 255 / .08); font-weight: 500; font-size: 0.84rem; cursor: pointer; }
   .slots :global(.slot:hover span) { transform: translateY(-3px); }
   .slots :global(.slot:has(input:checked) span) { background: var(--white); color: var(--brand); border-color: var(--white); }
   .slots :global(.slot:has(input:focus-visible) span) { outline: 2px solid var(--white); outline-offset: 2px; }
-  .cal__tz { margin-top: 10px; font-size: 0.72rem; color: var(--on-brand-muted); }
-  .book__btn { position: relative; overflow: hidden; isolation: isolate; margin-top: 22px; display: flex; justify-content: center; gap: 10px; padding: 16px; background: var(--white); color: var(--brand); font-weight: 500; font-size: 0.906rem; }
+  .cal__tz { margin-top: 8px; font-size: 0.72rem; color: var(--on-brand-muted); }
+  .book__btn { position: relative; overflow: hidden; isolation: isolate; margin-top: 24px; display: flex; justify-content: center; gap: 8px; padding: 16px; background: var(--white); color: var(--brand); font-weight: 500; font-size: 0.906rem; }
   .book__btn::before { content: ''; position: absolute; inset: -1px; z-index: -1; background: var(--cream-2); clip-path: circle(0% at var(--fx, 50%) var(--fy, 100%)); transition: clip-path .7s cubic-bezier(.16,1,.3,1); }
   .book__btn:hover::before, .book__btn:focus-visible::before { clip-path: circle(150% at var(--fx, 50%) var(--fy, 100%)); }
   .book__btn span { display: inline-block; transition: transform .5s cubic-bezier(.16,1,.3,1); }
@@ -259,16 +259,16 @@ const monthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeri
   .book__btn:disabled:not([aria-busy]) { cursor: not-allowed; }
   @media (max-width: 420px) { .slots { grid-template-columns: repeat(3, 1fr); } }
   .cal[hidden], .booked[hidden] { display: none; }
-  .who { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 18px; }
-  .who__f { display: grid; gap: 6px; font-size: 0.72rem; color: var(--on-brand-muted); }
+  .who { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; }
+  .who__f { display: grid; gap: 8px; font-size: 0.72rem; color: var(--on-brand-muted); }
   .who__f input { width: 100%; padding: 12px 12px; background: rgb(255 255 255 / .08); border: 1.2px solid rgb(255 255 255 / .35); color: var(--white); font-size: 0.84rem; border-radius: 0; }
   .who__f input::placeholder { color: rgb(255 255 255 / .55); }
   .who__f input:focus { outline: none; border-color: var(--white); background: rgb(255 255 255 / .14); }
   @media (max-width: 420px) { .who { grid-template-columns: 1fr; } }
   .book__btn { width: 100%; cursor: pointer; }
   .book__btn:disabled { opacity: .75; cursor: progress; }
-  .book__status { margin-top: 10px; font-size: 0.78rem; color: var(--white); background: rgb(0 0 0 / .18); padding: 10px 12px; }
-  .booked { display: grid; gap: 12px; justify-items: start; padding: 28px 0 8px; outline: none; }
+  .book__status { margin-top: 8px; font-size: 0.78rem; color: var(--white); background: rgb(0 0 0 / .18); padding: 8px 12px; }
+  .booked { display: grid; gap: 12px; justify-items: start; padding: 32px 0 8px; outline: none; }
   .booked__mark { width: 48px; height: 48px; display: grid; place-items: center; background: var(--white); color: var(--brand); font-size: 1.3rem; }
   .booked__title { font-family: var(--font-display); font-size: 1.6rem; letter-spacing: var(--track-l); }
   .booked__text { font-size: 0.875rem; line-height: 1.6; color: var(--on-brand-muted); }

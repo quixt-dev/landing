@@ -9,16 +9,16 @@ import { hero } from '../../data/home';
     <p class="lead" data-reveal="load" data-delay=".45">{hero.lead}</p>
   </div>
   <div class="hero__ctas" data-stagger="load" data-delay=".6">
-    <Button href="/projects/">View Our Work</Button>
+    <Button href="/projects/">View My Work</Button>
     <Button href="/contact/">Start A Project</Button>
   </div>
 </section>
 <style>
-  .hero { display: grid; gap: 32px; padding-top: clamp(48px, 5.3vw, 76px); }
-  .hero__copy { display: grid; gap: 26px; }
+  .hero { display: grid; gap: 32px; padding-top: clamp(48px, 5.3vw, 80px); padding-top: round(clamp(48px, 5.3vw, 80px), 8px); }
+  .hero__copy { display: grid; gap: 24px; }
   .hero h1 { line-height: var(--lh-tight); letter-spacing: var(--track-xl); word-spacing: var(--words-xl); }
   .hero .lead { max-width: 37.5rem; }
-  .hero__ctas { display: flex; flex-wrap: wrap; gap: 13px; }
+  .hero__ctas { display: flex; flex-wrap: wrap; gap: 12px; }
   @media (min-width: 900px) {
     .hero { grid-template-columns: 1fr auto; align-items: end; }
     .hero__ctas { flex-direction: column; align-items: flex-end; }

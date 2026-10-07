@@ -9,7 +9,7 @@ import { projects } from '../../data/projects';
 import { graph, organization, website, webPage, breadcrumbs, abs } from '../../lib/schema';
 
 const path = '/projects/';
-const title = 'Projects & Case Studies, Apps And SaaS We’ve Built';
+const title = 'Case Studies · AI Products & Landing Pages Built By Quixt';
 const description = 'Quixt case studies: Tessa (AI marketing), NandyAI (society management), Flowgentic (multi-agent AI) and the Infinify studio site.';
 const jsonLd = graph(
   organization(), website(),
@@ -21,7 +21,7 @@ const jsonLd = graph(
 <BaseLayout title={title} description={description} jsonLd={jsonLd}>
   <section class="container list-hero">
     <Breadcrumbs items={[{ name: 'Home', href: '/' }, { name: 'Projects' }]} />
-    <SectionHeader level="h1" eyebrow="Selected Work" title={'Products\nWe’re Proud Of'} lead="We Partner With Startups And Growing Companies To Build Reliable, Scalable, And User-Focused Digital Products." />
+    <SectionHeader level="h1" eyebrow="Selected Work" title={'AI Products\nI’ve Shipped'} lead="Agent Platforms, AI SaaS And Launch Pages, Each Designed And Built End To End. Open Any Card For The Architecture, Stack And Code." />
   </section>
   <section class="container list" aria-label="All projects">
     {projects.map((p, i) => (
@@ -40,11 +40,11 @@ const jsonLd = graph(
   <CtaBand />
 </BaseLayout>
 <style>
-  .list-hero { padding-top: clamp(40px, 4.2vw, 60px); display: grid; gap: 48px; }
-  .list { margin-top: 72px; display: grid; gap: 20px; }
-  .proj { display: grid; gap: 24px; background: var(--cream); padding: 20px; align-items: center; }
+  .list-hero { padding-top: clamp(40px, 4.2vw, 64px); padding-top: round(clamp(40px, 4.2vw, 64px), 8px); display: grid; gap: 48px; }
+  .list { margin-top: 72px; display: grid; gap: 16px; }
+  .proj { display: grid; gap: 24px; background: var(--cream); padding: 16px; align-items: center; }
   .proj img { width: 100%; height: auto; }
-  .proj__copy { display: grid; gap: 14px; justify-items: start; padding: 12px; }
+  .proj__copy { display: grid; gap: 16px; justify-items: start; padding: 12px; }
   .proj__name { font-size: clamp(2.5rem, 5vw, 4.5rem); letter-spacing: var(--track-xl); word-spacing: var(--words-xl); line-height: 1.1; }
   .role { font-size: var(--fs-small); color: var(--brand-ink); }
   .soon { font-weight: 500; font-size: var(--fs-small); padding: 12px 16px; border: 1.5px dashed var(--line); }

@@ -27,12 +27,12 @@ const hasActions = Astro.slots.has('default');
 </header>
 <style>
   .sh { display: grid; gap: 24px; }
-  .sh__main { display: grid; gap: 14px; }
+  .sh__main { display: grid; gap: 16px; }
   .sh--split { grid-template-columns: 1fr; align-items: end; }
   .sh__aside { display: grid; gap: 24px; justify-items: start; }
   .sh__aside .sh__lead { max-width: 30rem; }
   .sh--center { text-align: center; justify-items: center; }
-  .sh--center .sh__main { justify-items: center; gap: 20px; }
+  .sh--center .sh__main { justify-items: center; gap: 16px; }
   .sh--center .sh__lead { max-width: 45rem; }
   .sh--split .sh__main .sh__lead { max-width: 39rem; margin-top: 8px; }
   .sh__actions { display: flex; gap: 12px; flex-wrap: wrap; }

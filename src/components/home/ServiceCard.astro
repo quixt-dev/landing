@@ -1,40 +1,63 @@
 ---
+/** One bento tile: a service (wide, cream) or a supporting point (narrow, orange). */
 import TagList from '../ui/TagList.astro';
-import Icon from '../ui/Icon.astro';
-import { serviceIcons } from '../../lib/graphics/icons';
+import { graphicSrc, serviceArtSize } from '../../lib/graphics/registry';
 import { pad2 } from '../../lib/text';
-export interface Props { title: string; slug: string; description: string; tags: string[]; icon: string; index: number }
-const { title, slug, description, tags, icon, index } = Astro.props;
+import type { ServiceArt } from '../../data/home';
+export interface Props { title: string; text: string; art: ServiceArt; kicker: string; tags: string[]; id?: string; index?: number; icon?: 'bolt' | 'branch' }
+const { title, text, art, id, kicker, index, tags, icon } = Astro.props;
+/** Line glyphs for the marker square of the supporting tiles (services show their number instead). */
+const glyphs = {
+  bolt: '<path d="M9 1.5L3.5 9H8L7 14.5L12.5 7H8L9 1.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="none"/>',
+  branch: '<circle cx="4.5" cy="3.5" r="1.6"/><circle cx="4.5" cy="12.5" r="1.6"/><circle cx="11.5" cy="5.5" r="1.6"/><path d="M4.5 5.1V10.9M11.5 7.1C11.5 9.5 4.5 8.5 4.5 10.9" fill="none"/>',
+};
+const { W, H, dark } = serviceArtSize(art);
 ---
-<article class="svc" id={`service-${slug}`}>
-  <div class="svc__top">
-    <span class="svc__icon"><Icon paths={serviceIcons[icon]} size={36} viewBox={36} /></span>
-    <span class="svc__index" aria-hidden="true">{pad2(index)}</span>
+<article class:list={['tile', dark ? 'tile--dark on-brand' : 'tile--wide']} id={id} data-spot>
+  <div class="tile__media" style={`--ar:${W + 16} / ${H + 12}`}>
+    <span class="tile__grid" aria-hidden="true"></span>
+    <!-- a cached SVG file, swapped for live inline SVG just before it scrolls into view (src/scripts/artMotion.ts) -->
+    <img class="tile__art" data-inline-art={art} src={graphicSrc(`service-${art}`)} width={W + 16} height={H + 12} alt="" loading="lazy" decoding="async" />
   </div>
-  <div class="svc__body">
-    <h3 class="svc__title">{title}</h3>
-    <p class="svc__desc">{description}</p>
-    <TagList tags={tags} label={`${title} technologies`} />
+  <div class="tile__body">
+    <p class="tile__kicker">
+      <span class="tile__index" aria-hidden="true">{index !== undefined ? pad2(index) : icon && <svg width="16" height="16" viewBox="0 0 16 16" stroke="currentColor" stroke-width="1.3" fill="currentColor" set:html={glyphs[icon]} />}</span>{kicker}
+    </p>
+    <h3 class="tile__title">{title}</h3>
+    <p class="tile__text">{text}</p>
+    <TagList tags={tags} tone={dark ? 'on-brand' : 'light'} label={`${title} stack`} />
   </div>
 </article>
 <style>
-  .svc { position: relative; overflow: hidden; background: var(--cream); padding: 26px; transition: background-color .5s cubic-bezier(.16,1,.3,1); display: flex; flex-direction: column; justify-content: space-between; gap: 64px; min-height: 360px; }
-  .svc__top { display: flex; justify-content: space-between; align-items: start; }
-  .svc__icon { background: var(--brand); color: var(--white); width: 36px; height: 36px; display: grid; place-items: center; }
-  .svc__index { width: 36px; height: 36px; display: grid; place-items: center; background: var(--white); border: 1px solid var(--line-soft); font-size: 0.75rem; }
-  .svc__body { container-type: inline-size; }
-  /* Tags stay on one line: they shrink with the card (sized for the longest row, ~300px at full size) rather than wrap. */
-  .svc__body :global(.tags) { flex-wrap: nowrap; }
-  .svc__body :global(.tag) { white-space: nowrap; font-size: min(var(--fs-xs), 4.1cqi); padding: .4em .72em; }
-  .svc__title { font-size: var(--fs-h3); line-height: var(--lh-tight); letter-spacing: var(--track-l); word-spacing: var(--words-l); }
-  .svc__desc { margin: 12px 0 24px; font-size: 0.84rem; line-height: 1.5; color: var(--brand-ink); max-width: 34ch; }
-  .svc::after { content: ''; position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: var(--brand); transform: scaleX(0); transform-origin: 0 50%; transition: transform .7s cubic-bezier(.16,1,.3,1); }
-  .svc:hover { background: var(--cream-2); }
-  .svc:hover::after { transform: scaleX(1); }
-  .svc__icon, .svc__index { transition: transform .6s cubic-bezier(.16,1,.3,1), background-color .35s, color .35s; }
-  .svc:hover .svc__index { background: var(--brand); color: var(--white); }
-  .svc__title { transition: transform .6s cubic-bezier(.16,1,.3,1); }
-  .svc:hover .svc__title { transform: translateY(-6px); }
-  @media (min-width: 1100px) { .svc { min-height: 433px; } }
-  @media (max-width: 600px) { .svc { padding-left: var(--card-x-m); padding-right: var(--card-x-m); } }   /* unified mobile card inset */
+  .tile { position: relative; background: var(--cream); display: grid; grid-template-rows: auto 1fr; overflow: hidden; transition: transform .7s cubic-bezier(.16,1,.3,1); }
+  .tile:hover { transform: translateY(-6px); }
+  .tile--dark { background: var(--brand); }
+
+  /* every tile's graphic is the same height and every body has the same structure, so titles line up across a row */
+  .tile__media { position: relative; height: 224px; height: round(clamp(224px, 30vw, 440px), 8px); overflow: hidden; isolation: isolate; }
+  /* the same masked blueprint grid as the case-study bento; the art's own grid is hidden */
+  .tile__grid {
+    --g: rgb(171 66 0 / .07); --step: 16px; --lw: 1px;
+    position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background-image: linear-gradient(90deg, var(--g) var(--lw), transparent var(--lw)), linear-gradient(180deg, var(--g) var(--lw), transparent var(--lw));
+    background-size: var(--step) var(--step); background-position: center 6px;
+    -webkit-mask-image: radial-gradient(80% 90% at 50% 45%, #000 40%, transparent 90%); mask-image: radial-gradient(80% 90% at 50% 45%, #000 40%, transparent 90%);
+  }
+  .tile--dark .tile__grid { --g: rgb(255 255 255 / .085); }
+  @media (min-resolution: 2dppx) { .tile__grid { --lw: .5px; } }
+  .tile__art :global(.bp-grid) { display: none; }
+  .tile__art { display: block; width: 100%; height: 100%; object-fit: contain; position: absolute; inset: 0; transition: transform 1.2s cubic-bezier(.16,1,.3,1); }
+  .tile:hover .tile__art { transform: scale(1.03); }
+
+  /* one unified rhythm: 24px from the graphic to the first line, 16px between text items, 32px to the tile edge */
+  .tile__body { padding: var(--s-3) var(--s-4) var(--s-4); display: grid; align-content: start; gap: var(--s-2); }
+  .tile__kicker { display: flex; align-items: center; gap: var(--s-2); font-size: var(--fs-small); font-weight: 500; color: var(--brand-ink); }
+  .tile__index { width: 32px; height: 32px; display: grid; place-items: center; background: var(--brand); color: var(--white); font-size: 0.75rem; flex: none; }
+  .tile__title { font-size: var(--fs-h3); line-height: var(--lh-tight); letter-spacing: var(--track-l); word-spacing: var(--words-l); }
+  .tile__text { font-size: 0.9rem; line-height: 1.55; color: var(--brand-ink); max-width: 44ch; }
+  .tile--dark .tile__text, .tile--dark .tile__kicker { color: var(--on-brand-muted); }
+  .tile--dark .tile__index { background: var(--white); color: var(--brand); }
+  /* single column: each graphic gets its own aspect ratio instead of a shared row height */
+  @media (max-width: 759.98px) { .tile__media { height: auto; aspect-ratio: var(--ar); } }
+  @media (max-width: 600px) { .tile__body { padding-left: var(--card-x-m); padding-right: var(--card-x-m); } }   /* unified mobile card inset */
 </style>

@@ -16,8 +16,8 @@ import { contactFaqs, glossary } from '../data/contact';
 import { graph, organization, website, webPage, breadcrumbs, faqPage, definedTermSet, ids, abs } from '../lib/schema';
 
 const path = '/contact/';
-const title = 'Contact Quixt · Start A Project Or Book A Free 30-Min Call';
-const description = 'Tell us your idea in plain English, no specs or tech skills needed. Get a reply in 24 hours, a free 30-min call and a fixed-price proposal in 3 days.';
+const title = 'Contact Quixt · Start A Landing Page Or MVP For Your AI Startup';
+const description = 'Tell Dhiraj what you’re building. Reply within 24 hours, a free 30-min scope call and a fixed quote for your landing page (from $1,499) or MVP (from $3,499).';
 const jsonLd = graph(
   organization(), website(),
   { ...webPage({ path, title, description, type: 'ContactPage', breadcrumbs: true, image: '/og/contact.png' }), mainEntity: { '@id': ids.org } },
@@ -30,11 +30,11 @@ const jsonLd = graph(
     name: 'How to start a project with Quixt',
     totalTime: 'P7D',
     step: [
-      { '@type': 'HowToStep', position: 1, name: 'Share your idea', text: 'Fill in the four-step project brief or book a free 30-minute call. No technical knowledge needed.' },
-      { '@type': 'HowToStep', position: 2, name: 'We reply', text: 'A real person replies within 24 hours.' },
-      { '@type': 'HowToStep', position: 3, name: 'Discovery call', text: 'A relaxed 30-minute conversation about your idea, users and goals.' },
-      { '@type': 'HowToStep', position: 4, name: 'Clear proposal', text: 'Within three days you receive scope, screens, a fixed price and a timeline in plain English.' },
-      { '@type': 'HowToStep', position: 5, name: 'Kick-off', text: 'Meet your team and see a first demo within two weeks.' },
+      { '@type': 'HowToStep', position: 1, name: 'Share your idea', text: 'Fill in the four-step project brief or book a free 30-minute call.' },
+      { '@type': 'HowToStep', position: 2, name: 'Reply', text: 'Dhiraj reads every brief and replies within 24 hours.' },
+      { '@type': 'HowToStep', position: 3, name: 'Scope call', text: 'A 30-minute conversation about your product, users and launch date.' },
+      { '@type': 'HowToStep', position: 4, name: 'Fixed quote', text: 'Within three days you receive scope, deliverables, a fixed price and a timeline on one page.' },
+      { '@type': 'HowToStep', position: 5, name: 'Kick-off', text: 'A shared board and a live preview URL that updates with every release.' },
     ],
   },
 );
@@ -42,10 +42,10 @@ const jsonLd = graph(
 <BaseLayout title={title} description={description} image="/og/contact.png" imageAlt={`Contact ${site.name}`} jsonLd={jsonLd}>
   <ContactHero />
   <section id="brief" class="section container" aria-labelledby="brief-heading">
-    <SectionHeader id="brief-heading" eyebrow="01 · Project Brief" title={'Four Short Steps,\nAbout Two Minutes'} lead="Every Question Has A “Not Sure” Option. Rough Answers Are Perfectly Fine, We’ll Work Out The Details Together." />
+    <SectionHeader id="brief-heading" eyebrow="01 · Project Brief" title={'Four Short Steps,\nAbout Two Minutes'} lead="Every Question Has A “Not Sure” Option. Rough Answers Are Fine, We’ll Work Out The Details On The Call." />
     <div class="brief-row">
       <ProjectBriefForm />
-      <aside class="side" aria-label="Other ways to reach us" data-stagger data-each=".12">
+      <aside class="side" aria-label="Other ways to reach me" data-stagger data-each=".12">
         <BookCall />
         <DirectLines />
         <PromiseCard />
@@ -56,10 +56,10 @@ const jsonLd = graph(
   <Translator />
   <Glossary />
   <StarterKit />
-  <FAQ items={contactFaqs} layout="split" eyebrow="06 · FAQ" title={'Questions First-\nTime Founders\nAsk Us'} lead="Still Wondering Something? Ask Us Anything On The Free Call, There Are No Silly Questions." />
+  <FAQ items={contactFaqs} layout="split" eyebrow="06 · FAQ" title={'Questions AI\nFounders Ask\nBefore We Start'} lead="Still Wondering Something? Ask Me Anything On The Free Call." />
 </BaseLayout>
 <style>
-  .brief-row { margin-top: 56px; display: grid; gap: 20px; }
-  .side { display: grid; gap: 20px; align-content: start; }
+  .brief-row { margin-top: 56px; display: grid; gap: 16px; }
+  .side { display: grid; gap: 16px; align-content: start; }
   @media (min-width: 1100px) { .brief-row { grid-template-columns: minmax(0, 1fr) 446px; align-items: start; } }
 </style>

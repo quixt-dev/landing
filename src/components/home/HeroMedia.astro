@@ -9,7 +9,7 @@ import { film } from '../../data/home';
 <div class="container media-wrap">
   <figure class="media duotone" data-clip>
     <Picture src={team} formats={['avif', 'webp']} widths={[640, 960, 1286, 1800]} sizes="(min-width: 1440px) 1286px, 100vw"
-      alt="A team of developers coding together on laptops around a studio table" loading="eager" fetchpriority="high" />
+      alt="A team of developers coding together on laptops around a studio table" loading="eager" />
     <CornerBrackets color="#fff" inset={24} size={46} weight={3} />
     <!-- Without JS this opens Mux's hosted player; with JS the custom theatre in VideoTheatre.astro takes over. -->
     <a class="play" href={`https://player.mux.com/${film.playbackId}`} aria-label={`Play video: ${film.title}`} aria-haspopup="dialog"
@@ -23,7 +23,7 @@ import { film } from '../../data/home';
   <VideoTheatre {...film} />
 </div>
 <style>
-  .media-wrap { padding-top: 19px; }
+  .media-wrap { padding-top: 16px; }
   .media { position: relative; width: 100%; max-width: 100%; margin: 0; overflow: hidden; aspect-ratio: 1286 / 620; max-height: 88vh; max-height: 88svh; background: var(--cream-2); }
   .media :global(picture), .media :global(img) { width: 100%; height: 100%; object-fit: cover; object-position: 50% 32%; }   /* keeps the two developers in front */
   @media (max-width: 1024px) { .media { aspect-ratio: 16 / 9; } }

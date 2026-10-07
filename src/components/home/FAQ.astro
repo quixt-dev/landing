@@ -9,7 +9,7 @@ const { items, title = 'Frequently Asked\nQuestions', eyebrow, lead, layout = 'c
   <div class="faq__list" data-reveal><Accordion items={items} /></div>
 </section>
 <style>
-  .faq--center .faq__list { max-width: 744px; margin: 62px auto 0; }
+  .faq--center .faq__list { max-width: 744px; margin: 64px auto 0; }
   .faq--split { display: grid; gap: 48px; }
   .faq--split :global(.sh__title) { font-size: clamp(2rem, 3.6vw, 2.875rem); line-height: 1.26; }
   @media (min-width: 1000px) { .faq--split { grid-template-columns: 1fr minmax(0, 760px); gap: 40px; align-items: start; } }

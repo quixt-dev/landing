@@ -34,30 +34,30 @@ const limits = ['Liability', 'Warranty'];
   </div>
 </section>
 <style>
-  .os__stats { margin-top: 56px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 20px; }
-  .os__stats li { background: var(--cream); padding: 26px 28px; display: grid; gap: 8px; transition: transform .6s cubic-bezier(.16,1,.3,1), background-color .4s; }
+  .os__stats { margin-top: 56px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 16px; }
+  .os__stats li { background: var(--cream); padding: 24px 32px; display: grid; gap: 8px; transition: transform .6s cubic-bezier(.16,1,.3,1), background-color .4s; }
   .os__stats li:hover { transform: translateY(-5px); background: var(--cream-2); }
   .os__stats li:first-child { background: var(--brand); color: var(--white); }
   .os__stats strong { font-family: var(--font-display); font-weight: 400; font-size: clamp(2.6rem, 4vw, 3.5rem); letter-spacing: -0.04em; line-height: 1.1; }
   .os__stats span { font-size: var(--fs-small); color: var(--brand-ink); }
   .os__stats li:first-child span { color: var(--on-brand-muted); }
-  .os__row { margin-top: 20px; display: grid; gap: 20px; }
-  .lic { border: 1.5px solid var(--line); padding: 28px; display: grid; gap: 24px; align-content: start; }
-  .lic__head { display: flex; gap: 14px; align-items: center; }
+  .os__row { margin-top: 16px; display: grid; gap: 16px; }
+  .lic { border: 1.5px solid var(--line); padding: 32px; display: grid; gap: 24px; align-content: start; }
+  .lic__head { display: flex; gap: 16px; align-items: center; }
   .lic__name { font-family: var(--font-display); font-size: 1.5rem; letter-spacing: var(--track-m); word-spacing: var(--words-m); }
   .lic__sub { font-size: var(--fs-xs); color: var(--brand-ink); }
-  .lic__cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; }
-  .lic__t { font-weight: 500; font-size: var(--fs-small); margin-bottom: 10px; }
-  .lic li { display: flex; align-items: center; gap: 10px; font-size: var(--fs-small); padding: 4px 0; }
+  .lic__cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; }
+  .lic__t { font-weight: 500; font-size: var(--fs-small); margin-bottom: 8px; }
+  .lic li { display: flex; align-items: center; gap: 8px; font-size: var(--fs-small); padding: 4px 0; }
   .lic li::before { content: ''; width: 12px; height: 12px; flex: none; }
   .ok::before { background: var(--brand); clip-path: polygon(14% 52%, 38% 76%, 88% 22%, 100% 34%, 38% 96%, 0 62%); }
   .info::before { border: 1.5px solid var(--brand); border-radius: 50%; }
   .no::before { background: linear-gradient(45deg, transparent 44%, var(--brand) 44% 56%, transparent 56%), linear-gradient(-45deg, transparent 44%, var(--brand) 44% 56%, transparent 56%); }
   .term { background: var(--ink-dark); color: #f3e3d8; min-width: 0; }
-  .term__bar { display: flex; gap: 6px; align-items: center; height: 38px; padding: 0 16px; background: #2b1408; font-size: var(--fs-xs); }
+  .term__bar { display: flex; gap: 8px; align-items: center; height: 38px; padding: 0 16px; background: #2b1408; font-size: var(--fs-xs); }
   .term__bar span { width: 8px; height: 8px; background: #6b3a1e; } .term__bar span:nth-child(3) { background: #e07a3a; }
   .term__bar em { font-style: normal; margin-left: 12px; color: #b87a56; }
-  pre { margin: 0; padding: 22px 20px; overflow-x: auto; font-family: var(--font-body); font-size: 0.84rem; line-height: 1.9; }
+  pre { margin: 0; padding: 24px 16px; overflow-x: auto; font-family: var(--font-body); font-size: 0.84rem; line-height: 1.9; }
   code { display: grid; }
   .ln { white-space: pre; }
   .ln b { color: #e07a3a; font-weight: 500; }

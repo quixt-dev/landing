@@ -12,7 +12,7 @@ const dash = shot ? '' : dashboards[slug]();
 ---
 <div class="container hv-wrap">
   <figure class:list={['hv', shot && 'hv--shot']}>
-    <img class="hv__bg" data-parallax="0.12" src={graphicSrc(`${slug}-backdrop`)} width="1286" height="720" alt="" decoding="async" />
+    <img class="hv__bg" data-parallax="0.12" src={graphicSrc(`${slug}-backdrop`)} width="1286" height="720" alt="" fetchpriority="low" decoding="async" />
     <CornerBrackets color="#AB4200" inset={22} size={40} />
     <div class="hv__frame" data-tilt-in>
       {shot ? (
@@ -29,11 +29,11 @@ const dash = shot ? '' : dashboards[slug]();
   .hv { perspective: 1600px; position: relative; background: var(--cream); aspect-ratio: 1286 / 720; overflow: hidden; display: grid; place-items: center; min-height: 280px; }
   .hv__bg { position: absolute; inset: -6% 0; width: 100%; height: 112%; object-fit: cover; }
   .hv__frame { position: relative; width: 76.2%; box-shadow: 0 28px 70px -10px rgb(60 30 10 / .22); border: 1px solid rgb(0 0 0 / .08); background: #fff; }
-  .hv__bar { display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 12px; background: #f4f4f5; border-bottom: 1px solid rgb(0 0 0 / .06); }
+  .hv__bar { display: flex; align-items: center; gap: 8px; height: 26px; padding: 0 12px; background: #f4f4f5; border-bottom: 1px solid rgb(0 0 0 / .06); }
   .hv__bar span { width: 8px; height: 8px; border-radius: 50%; background: #d4d4d8; }
   .hv__bar em { margin-left: auto; margin-right: auto; font-style: normal; font-size: 0.66rem; color: #71717a; padding: 2px 40px; background: #fff; border-radius: 4px; transform: translateX(-12px); }
   .hv__dash { display: block; width: 100%; height: auto; }
-  .hv--shot { aspect-ratio: auto; padding: clamp(40px, 6vw, 88px) 0; }
+  .hv--shot { aspect-ratio: auto; padding: clamp(40px, 6vw, 88px) 0; padding: round(clamp(40px, 6vw, 88px), 8px) 0; }
   .hv--shot .hv__frame { width: min(76.2%, 980px); }
   .hv__shot, .hv__shot :global(img) { display: block; width: 100%; height: auto; }
   @media (max-width: 640px) { .hv__frame { width: 94%; } .hv__bar { height: 18px; } .hv__bar em { display: none; } }

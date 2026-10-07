@@ -12,6 +12,7 @@ export const buildIcons: Record<string, string> = {
   browser: '<rect x="4" y="8" width="32" height="24"/><path d="M4 14H36M9 20H24M9 25H19"/><rect x="7" y="10" width="1.5" height="1.5"/><rect x="11" y="10" width="1.5" height="1.5"/>',
   phone: '<rect x="12" y="4" width="16" height="32"/><path d="M17 8H23"/><rect x="18.5" y="30" width="3" height="3"/>',
   dashboard: '<rect x="4" y="6" width="32" height="28"/><path d="M12 6V34M16 28L21 21L25 24L32 14"/>',
+  stack: '<rect x="4" y="13" width="22" height="20"/><path d="M4 18H26M11 6H36V26H26M11 6V13"/><path d="M8 23H18M8 27H14"/>',
   question: '<circle cx="20" cy="20" r="15"/><path d="M15.5 16C15.5 11 24.5 11 24.5 16C24.5 19.5 20 19.5 20 23.5"/><rect x="19" y="27.5" width="2" height="2"/>',
 };
 // Glossary icons: one 32-unit grid, 1.5 stroke, the metaphors developers already read at a glance

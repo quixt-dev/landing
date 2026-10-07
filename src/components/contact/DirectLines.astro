@@ -5,13 +5,13 @@ import Icon from '../ui/Icon.astro';
 const lines = [
   { key: 'email', label: 'Email', value: site.email, href: `mailto:${site.email}` },
   { key: 'phone', label: 'Call', value: site.phone, href: `tel:${site.phoneHref}` },
-  { key: 'whatsapp', label: 'WhatsApp', value: 'Chat With Us, Replies In Minutes', href: site.whatsapp },
+  { key: 'whatsapp', label: 'WhatsApp', value: 'Chat With Me, Replies In Minutes', href: site.whatsapp },
   // Office is plain text on purpose: no map link.
   { key: 'office', label: 'Office', value: `${site.address.street}, ${site.address.locality} · Mon–Fri` },
 ] as { key: string; label: string; value: string; href?: string }[];
 ---
 <section class="dl" aria-labelledby="dl-title">
-  <h3 id="dl-title" class="dl__title">Or Reach Us Directly</h3>
+  <h3 id="dl-title" class="dl__title">Or Reach Me Directly</h3>
   <address>
     <ul role="list">
       {lines.map((l) => (
@@ -32,12 +32,12 @@ const lines = [
   </address>
 </section>
 <style>
-  .dl { background: var(--cream); padding: 28px 28px 12px; }
+  .dl { background: var(--cream); padding: 32px 32px 12px; }
   .dl__title { font-family: var(--font-body); font-weight: 500; font-size: var(--fs-body); margin-bottom: 16px; }
   address { font-style: normal; }
-  .row { display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 14px; padding: 16px 0; border-top: 1.5px solid var(--line-soft); }
+  .row { display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 16px; padding: 16px 0; border-top: 1.5px solid var(--line-soft); }
   .ic { width: 40px; height: 40px; display: grid; place-items: center; background: var(--white); border: 1px solid var(--line); }
-  .tx { display: grid; gap: 3px; min-width: 0; }
+  .tx { display: grid; gap: 4px; min-width: 0; }
   .lb { font-size: 0.72rem; color: var(--brand-ink); }
   .vl { font-weight: 500; font-size: 0.875rem; overflow-wrap: anywhere; }
   li a:hover .vl { text-decoration: underline; text-underline-offset: 3px; }

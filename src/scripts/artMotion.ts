@@ -126,6 +126,8 @@ async function inlineArt(img: HTMLImageElement) {
     const doc = new DOMParser().parseFromString(await res.text(), 'image/svg+xml');
     const svg = document.importNode(doc.documentElement, true) as unknown as SVGSVGElement;
     svg.setAttribute('class', img.className);
+    // keep the component's scoped-style hook, so its CSS still applies to the swapped-in SVG
+    for (const a of Array.from(img.attributes)) if (a.name.startsWith('data-astro-cid')) svg.setAttribute(a.name, a.value);
     svg.setAttribute('aria-hidden', 'true');
     svg.setAttribute('focusable', 'false');
     svg.removeAttribute('width'); svg.removeAttribute('height');
