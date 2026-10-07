@@ -36,11 +36,11 @@ const d = architecture(arch);
   </div>
 </section>
 <style>
-  .panel { position: relative; background-color: var(--brand); padding: clamp(40px, 5.6vw, 80px) clamp(20px, 5vw, 72px) clamp(40px, 5vw, 64px); }
+  .panel { position: relative; background-color: var(--brand); padding: clamp(40px, 5.6vw, 80px) clamp(16px, 5vw, 72px) clamp(40px, 5vw, 64px); padding: round(clamp(40px, 5.6vw, 80px), 8px) round(clamp(16px, 5vw, 72px), 8px) round(clamp(40px, 5vw, 64px), 8px); }
   .head { display: grid; gap: 24px; }
-  .head__main { display: grid; gap: 14px; }
+  .head__main { display: grid; gap: 16px; }
   .head .lead { max-width: 30rem; }
-  .diagram { margin-top: clamp(40px, 5vw, 70px); }
+  .diagram { margin-top: clamp(40px, 5vw, 72px); margin-top: round(clamp(40px, 5vw, 72px), 8px); }
   .diagram svg { width: 100%; min-width: 860px; height: auto; }
   .diagram :global(.arch-async) { animation: flow 1.2s linear infinite; }
   .diagram :global([data-node] > *) { transition: opacity .3s; }
@@ -48,7 +48,7 @@ const d = architecture(arch);
   .diagram svg :global([data-node]:hover > *) { opacity: 1; }
   @keyframes flow { to { stroke-dashoffset: -18; } }
   @media (prefers-reduced-motion: reduce) { .diagram :global(.arch-async) { animation: none; } .diagram :global(.packet) { display: none; } }
-  figcaption { margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--line-on-brand); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; font-size: var(--fs-xs); }
+  figcaption { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--line-on-brand); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; font-size: var(--fs-xs); }
   .legend { display: flex; flex-wrap: wrap; gap: 12px 40px; color: var(--on-brand-muted); }
   .legend li { display: inline-flex; align-items: center; gap: 12px; }
   .lg { display: inline-block; width: 36px; border-top: 1.5px solid #fff; }
@@ -57,8 +57,8 @@ const d = architecture(arch);
   .stats { font-weight: 500; }
   .text-alt { margin-top: 24px; font-size: var(--fs-small); color: var(--on-brand-muted); }
   .text-alt summary { cursor: pointer; font-weight: 500; color: var(--white); }
-  .text-alt dl { margin-top: 14px; display: grid; gap: 8px; }
+  .text-alt dl { margin-top: 16px; display: grid; gap: 8px; }
   .text-alt dt { font-weight: 500; color: var(--white); }
-  @media (min-width: 1000px) { .head { grid-template-columns: 1fr minmax(0, 27rem); } .head__main { grid-column: 1 / -1; grid-row: 1; } .head .lead { grid-column: 2; grid-row: 1; align-self: end; justify-self: end; margin-bottom: 6px; } }
+  @media (min-width: 1000px) { .head { grid-template-columns: 1fr minmax(0, 27rem); } .head__main { grid-column: 1 / -1; grid-row: 1; } .head .lead { grid-column: 2; grid-row: 1; align-self: end; justify-self: end; margin-bottom: 8px; } }
   @media (max-width: 600px) { .panel { padding-left: var(--card-x-m); padding-right: var(--card-x-m); } }   /* unified mobile card inset */
 </style>

@@ -22,7 +22,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).toString()
 const ogImage = new URL(image, Astro.site ?? site.url).toString();
 const robots = noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
 ---
-<meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>{fullTitle}</title>
 <meta name="description" content={description} />

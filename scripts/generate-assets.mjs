@@ -30,8 +30,8 @@ const base = `
 h1 { font-family: 'Roboto Mono', monospace; font-weight: 400; letter-spacing: -0.02em; }
 .mark { display: inline-flex; align-items: center; gap: 12px; font-family: 'Roboto Mono'; font-size: 34px; }
 `;
-/** Inline x mark for OG cards and PDFs (transparent background). */
-const mark = (fg = '#fff', accent = MARK_ACCENT, size = 30) => markSvg({ bg: null, fg, accent, pad: 0, size });
+/** The real Quixt wordmark for OG cards: white on orange panels, brand orange on cream. */
+const logo = (onCream = false) => `<img src="${pathToFileURL(join(root, onCream ? 'public/logo-brand.svg' : 'public/logo.svg')).href}" alt="Quixt" style="display:block;height:48px;width:auto">`;
 
 function shot(name, html, w, h, out) {
   const file = join(tmp, `${name}.html`); writeFileSync(file, html);
@@ -59,7 +59,7 @@ h1 { font-size: 60px; line-height: 1.18; }
 .chip { padding: 8px 14px; border: 1.5px solid rgba(255,255,255,.5); background: inherit; position: relative; }
 </style></head><body><div class="frame">${body}</div></body></html>`;
 
-shot('og-default', og(`<div class="panel"><img src="${graphic('dot-globe')}" style="position:absolute;right:40px;top:50%;transform:translateY(-50%);width:430px;height:430px"><div class="copy"><span class="mark">${mark()}Quixt</span><h1>We Build Digital Products That Power Growth</h1><div class="foot"><span class="chip">Web</span><span class="chip">Apps</span><span class="chip">SaaS</span><span style="margin-left:auto;align-self:center">quixt.dev</span></div></div></div>`), 1200, 630, join(root, 'public/og/default.png'));
+shot('og-default', og(`<div class="panel"><img src="${graphic('dot-globe')}" style="position:absolute;right:40px;top:50%;transform:translateY(-50%);width:430px;height:430px"><div class="copy"><span class="mark">${logo()}</span><h1>Landing Pages &amp; MVPs For AI Startups</h1><div class="foot"><span class="chip">Landing Page · $1,499</span><span class="chip">MVP · $3,499</span><span style="margin-left:auto;align-self:center">quixt.dev</span></div></div></div>`), 1200, 630, join(root, 'public/og/default.png'));
 
 const cases = [
   ['tessa', 'Tessa', 'AI Marketing Platform', ['29 Ad Themes', '6 Formats', 'Gemini']],
@@ -68,10 +68,10 @@ const cases = [
   ['infinify', 'Infinify', 'Design Studio Landing Page', ['Next.js 16', 'Motion', 'Static']],
 ];
 for (const [slug, name, cat, chips] of cases) {
-  shot(`og-${slug}`, og(`<div style="position:absolute;inset:18px;background:#FDF4EF;overflow:hidden"><img src="${graphic(`product-${slug}`)}" style="position:absolute;right:-30px;top:60px;width:660px"><div class="copy" style="color:#AB4200"><span class="mark">${mark('#AB4200', '#C9794A')}Quixt</span><div><p class="eyebrow">Case Study · ${cat}</p><h1 style="font-size:104px;letter-spacing:-0.05em;margin-top:8px">${name}</h1></div><div class="foot">${chips.map((c) => `<span class="chip" style="border-color:rgba(171,66,0,.35);background:#FDF4EF">${c}</span>`).join('')}</div></div></div>`), 1200, 630, join(root, `public/og/${slug}.png`));
+  shot(`og-${slug}`, og(`<div style="position:absolute;inset:18px;background:#FDF4EF;overflow:hidden"><img src="${graphic(`product-${slug}`)}" style="position:absolute;right:-30px;top:60px;width:660px"><div class="copy" style="color:#AB4200"><span class="mark">${logo(true)}</span><div><p class="eyebrow">Case Study · ${cat}</p><h1 style="font-size:104px;letter-spacing:-0.05em;margin-top:8px">${name}</h1></div><div class="foot">${chips.map((c) => `<span class="chip" style="border-color:rgba(171,66,0,.35);background:#FDF4EF">${c}</span>`).join('')}</div></div></div>`), 1200, 630, join(root, `public/og/${slug}.png`));
 }
 
-shot('og-contact', og(`<div class="panel"><img src="${graphic('client-globe')}" style="position:absolute;right:-70px;top:10px;width:560px"><div class="copy"><span class="mark">${mark()}Quixt</span><h1 style="font-size:54px">Tell Us Your Idea.<br>We’ll Handle<br>The Tech.</h1><div class="foot"><span class="chip">Reply In 24h</span><span class="chip">Free 30-Min Call</span><span class="chip">No Jargon</span></div></div></div>`), 1200, 630, join(root, 'public/og/contact.png'));
+shot('og-contact', og(`<div class="panel"><img src="${graphic('client-globe')}" style="position:absolute;right:-70px;top:10px;width:560px"><div class="copy"><span class="mark">${logo()}</span><h1 style="font-size:54px">Tell Me What<br>You’re Building.</h1><div class="foot"><span class="chip">Reply In 24h</span><span class="chip">Free 30-Min Call</span><span class="chip">Fixed Quote</span></div></div></div>`), 1200, 630, join(root, 'public/og/contact.png'));
 
 // ---------- Icons ----------
 // Glyph spans 68% of the favicon: big enough to read at 16px, and inside the circle Google crops search favicons to.

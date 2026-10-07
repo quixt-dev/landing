@@ -7,7 +7,7 @@ import { site } from '../../data/site';
     <div class="kit__copy" data-stagger data-each=".1">
       <p class="eyebrow">05 · Free Starter Kit</p>
       <h2 id="kit-title" class="kit__title">Not Ready To Talk Yet?<br />Start With A One-Page Brief.</h2>
-      <p class="lead">A Fill-In-The-Blanks Template That Helps You Think Through Your Idea, The Same One We Use With Every Client. Takes About 15 Minutes.</p>
+      <p class="lead">A Fill-In-The-Blanks Template That Helps You Think Through Your Idea, The Same One I Use With Every Client. Takes About 15 Minutes.</p>
       <div class="kit__btns">
         <Button href="/downloads/quixt-product-brief.pdf" variant="solid" download>Download Free Brief (PDF) &nbsp;↓</Button>
         <Button href="/downloads/quixt-product-brief-example.pdf">See A Filled Example</Button>
@@ -20,16 +20,16 @@ import { site } from '../../data/site';
         <p class="p__q">01 &nbsp;The Problem</p><p class="p__hint">What Frustrates Your Future Users?</p><i class="ln"></i><i class="ln ln--s"></i>
         <p class="p__q">02 &nbsp;Who It’s For</p><p class="p__hint">Describe One Real Person</p><i class="ln"></i><i class="ln ln--s"></i>
         <p class="p__q">03 &nbsp;Must-Have Features</p>
-        <p class="p__c on">Sign Up / Log In</p><p class="p__c on">Book A Walker</p><p class="p__c">Pay In The App</p>
-        <p class="p__q">04 &nbsp;Budget & Timeline</p><p class="p__pills"><span>$15K – $40K</span><span>1 – 3 Months</span></p>
+        <p class="p__c on">Sign Up / Log In</p><p class="p__c on">Upload Docs</p><p class="p__c">Chat With Agent</p>
+        <p class="p__q">04 &nbsp;Budget & Timeline</p><p class="p__pills"><span>$3,499 – $8K</span><span>Within A Month</span></p>
       </div>
       <p class="stamp"><strong>FREE</strong><span>15 Min</span></p>
     </div>
   </div>
 </section>
 <style>
-  .kit { position: relative; overflow: hidden; background-color: var(--cream); display: grid; gap: 40px; padding: clamp(32px, 4.4vw, 64px) clamp(24px, 4.4vw, 56px); }
-  .kit__copy { display: grid; gap: 20px; justify-items: start; align-content: center; }
+  .kit { position: relative; overflow: hidden; background-color: var(--cream); display: grid; gap: 40px; padding: clamp(32px, 4.4vw, 64px) clamp(24px, 4.4vw, 56px); padding: round(clamp(32px, 4.4vw, 64px), 8px) round(clamp(24px, 4.4vw, 56px), 8px); }
+  .kit__copy { display: grid; gap: 16px; justify-items: start; align-content: center; }
   .kit__title { font-size: clamp(1.8rem, 3.1vw, 2.5rem); line-height: 1.22; letter-spacing: var(--track-l); word-spacing: var(--words-l); }
   .kit .lead { max-width: 35rem; }
   .kit__btns { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
@@ -44,14 +44,14 @@ import { site } from '../../data/site';
   @keyframes tick { from { transform: scale(0); } }
   .page { position: absolute; background: var(--white); border: 1px solid var(--line); }
   .page--back { width: 330px; height: 400px; left: 60px; top: 30px; transform: rotate(-6deg); }
-  .page--front { width: 340px; height: 420px; left: 0; top: 10px; transform: rotate(3deg); padding: 30px 28px; box-shadow: 0 18px 40px -6px rgb(140 56 0 / .12); border-top: 6px solid var(--brand); font-size: 0.72rem; }
+  .page--front { width: 340px; height: 420px; left: 0; top: 10px; transform: rotate(3deg); padding: 32px 32px; box-shadow: 0 18px 40px -6px rgb(140 56 0 / .12); border-top: 6px solid var(--brand); font-size: 0.72rem; }
   .p__h { font-family: var(--font-display); font-size: 1.375rem; letter-spacing: var(--track-m); word-spacing: var(--words-m); }
-  .p__s { color: var(--brand-ink); font-size: 0.66rem; margin-bottom: 18px; }
-  .p__q { font-weight: 500; margin-top: 14px; }
+  .p__s { color: var(--brand-ink); font-size: 0.66rem; margin-bottom: 16px; }
+  .p__q { font-weight: 500; margin-top: 16px; }
   .p__hint { color: var(--brand-ink); font-size: 0.68rem; }
   .ln { display: block; height: 1px; background: rgb(171 66 0 / .3); margin-top: 16px; width: 100%; }
   .ln--s { width: 70%; background: rgb(171 66 0 / .2); }
-  .p__c { display: flex; gap: 8px; align-items: center; margin-top: 6px; font-size: 0.68rem; }
+  .p__c { display: flex; gap: 8px; align-items: center; margin-top: 8px; font-size: 0.68rem; }
   .p__c::before { content: ''; width: 10px; height: 10px; border: 1px solid rgb(171 66 0 / .6); }
   .p__c.on::before { background: var(--brand); }
   .p__pills { display: flex; gap: 8px; margin-top: 8px; }

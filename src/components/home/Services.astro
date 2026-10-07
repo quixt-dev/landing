@@ -1,18 +1,22 @@
 ---
 import SectionHeader from '../ui/SectionHeader.astro';
-import Button from '../ui/Button.astro';
 import ServiceCard from './ServiceCard.astro';
-import { services, servicesIntro } from '../../data/home';
+import { services, serviceExtras, servicesIntro } from '../../data/home';
+const [landing, mvp] = services;
+const [speed, handover] = serviceExtras;
 ---
 <section id="services" class="section container" aria-labelledby="services-title">
-  <SectionHeader id="services-title" align="center" title={servicesIntro.title} lead={servicesIntro.lead}>
-    <Button href="/contact/">Get A Free Estimate</Button>
-  </SectionHeader>
-  <div class="grid" data-stagger data-each=".1">
-    {services.map((s, i) => <ServiceCard {...s} index={i + 1} />)}
+  <SectionHeader id="services-title" align="split" leadBelow title={servicesIntro.title} lead={servicesIntro.lead} />
+  <!-- Bento: wide service | small point, then small point | wide service -->
+  <div class="bento" data-stagger data-each=".12">
+    <ServiceCard id={`service-${landing.slug}`} index={1} kicker={landing.kicker} title={landing.title} text={landing.description} art={landing.art} tags={landing.tags} />
+    <ServiceCard {...speed} />
+    <ServiceCard {...handover} />
+    <ServiceCard id={`service-${mvp.slug}`} index={2} kicker={mvp.kicker} title={mvp.title} text={mvp.description} art={mvp.art} tags={mvp.tags} />
   </div>
 </section>
 <style>
-  .grid { margin-top: 60px; display: grid; gap: 19px 20px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
-  @media (min-width: 1100px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+  .bento { margin-top: 64px; display: grid; gap: 16px; }
+  @media (min-width: 760px) and (max-width: 1099.98px) { .bento { grid-template-columns: 1fr 1fr; } .bento > :global(.tile--wide) { grid-column: span 2; } }
+  @media (min-width: 1100px) { .bento { grid-template-columns: repeat(3, 1fr); } .bento > :global(.tile--wide) { grid-column: span 2; } }
 </style>

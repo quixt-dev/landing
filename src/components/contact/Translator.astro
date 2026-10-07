@@ -4,10 +4,10 @@ import TagList from '../ui/TagList.astro';
 import { translations } from '../../data/contact';
 ---
 <section class="section container" aria-labelledby="tr-title">
-  <SectionHeader id="tr-title" eyebrow="03 · Not Sure What To Ask For?" title={'Describe The Outcome.\nWe’ll Name The Tech.'} lead="Most Great Products Start As One Sentence. Here’s How A Few Sentences Turned Into Real Builds." />
+  <SectionHeader id="tr-title" eyebrow="03 · Not Sure What To Ask For?" title={'Describe The Outcome.\nI’ll Name The Build.'} lead="Most AI Products Start As One Sentence. Here’s How A Few Typical Ones Map To A Package." />
   <table class="tr">
-    <caption class="visually-hidden">Examples of plain-language ideas and what Quixt builds for them, with typical timelines and starting prices</caption>
-    <thead><tr><th scope="col">You Say</th><th scope="col" aria-hidden="true"></th><th scope="col">We Build</th><th scope="col">Typical Scope</th></tr></thead>
+    <caption class="visually-hidden">Examples of founder requests and the Quixt package that fits each, with typical timelines and starting prices</caption>
+    <thead><tr><th scope="col">You Say</th><th scope="col" aria-hidden="true"></th><th scope="col">I Build</th><th scope="col">Typical Scope</th></tr></thead>
     <tbody data-stagger data-each=".1">
       {translations.map((t) => (
         <tr class:list={[t.featured && 'is-hot']}>
@@ -19,11 +19,11 @@ import { translations } from '../../data/contact';
       ))}
     </tbody>
   </table>
-  <p class="note">Estimates Are Indicative. Your Proposal Will Always Have A Fixed, Exact Price.</p>
+  <p class="note">Estimates Are Indicative. Your Quote Will Always Have A Fixed, Exact Price.</p>
 </section>
 <style>
   .tr { margin-top: 56px; width: 100%; border-collapse: separate; border-spacing: 0 12px; }
-  thead th { text-align: left; font-weight: 500; font-size: var(--fs-xs); color: var(--brand-ink); padding: 0 28px 2px; }
+  thead th { text-align: left; font-weight: 500; font-size: var(--fs-xs); color: var(--brand-ink); padding: 0 32px 2px; }
   tbody tr { background: var(--cream); transition: background-color .5s cubic-bezier(.16,1,.3,1), color .35s; }
   tbody tr:not(.is-hot):hover { background: var(--cream-2); }
   .arrow svg { transition: transform .6s cubic-bezier(.16,1,.3,1); }
@@ -32,7 +32,7 @@ import { translations } from '../../data/contact';
   tbody tr:hover :global(.tag) { transform: translateY(-3px); }
   tbody tr:hover :global(.tag:nth-child(2)) { transition-delay: .04s; } tbody tr:hover :global(.tag:nth-child(3)) { transition-delay: .08s; } tbody tr:hover :global(.tag:nth-child(4)) { transition-delay: .12s; }
   tbody tr.is-hot { background: var(--brand); color: var(--white); }
-  td, tbody th { padding: 28px; vertical-align: middle; }
+  td, tbody th { padding: 32px; vertical-align: middle; }
   .say { text-align: left; font-family: var(--font-display); font-weight: 400; font-size: clamp(1.1rem, 1.5vw, 1.3125rem); line-height: 1.43; letter-spacing: -0.01em; width: 34%; }
   .arrow { width: 60px; padding-inline: 0; }
   .scope { width: 190px; }

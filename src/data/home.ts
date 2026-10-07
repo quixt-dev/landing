@@ -1,6 +1,6 @@
 export const hero = {
-  title: 'We Build\nDigital Products\nThat Power Growth',
-  lead: 'Quixt Is A Design And Engineering Agency Crafting High-Performance Websites, Apps, And Software Solutions For Startups And Growing Businesses.',
+  title: 'Landing Pages\nAnd MVPs For\nAI Startups',
+  lead: 'I’m Dhiraj, And Quixt Is My One-Person Studio. I Design And Ship Launch Pages And First Products For AI And Agent-Infra Founders. Fixed Scope, Fixed Price, Code You Own.',
 };
 
 /** Studio film behind the hero photo. Hosted on Mux (public playback ID), played in the custom theatre player. */
@@ -18,50 +18,84 @@ export const film = {
 
 export const about = [
   {
-    id: 'agency',
+    id: 'solo',
     graphic: 'globe' as const,
-    text: 'We Are A **World Class Design & Engineering Agency.** MVPs To Enterprise Platforms, We Help Businesses Transform Ideas Into **Real-World Technology.**',
+    text: '**One Builder, Shipping Worldwide.** No Account Managers And No Hand-Offs. You Work Directly With The Person **Designing And Writing Your Code.**',
   },
   {
-    id: 'team',
+    id: 'since-14',
     graphic: 'orbit' as const,
-    text: 'We’re A **Team Of Developers** And Digital Strategists Focused On Building Reliable, Scalable, And **Future-Ready Products.**',
+    text: '**Shipping Since 14.** My First Product, A Web Host, Reached **95,000+ Users.** Today I Build **AI Products Of My Own.**',
   },
 ];
 
-export type ServiceIcon = 'pen' | 'asterisk' | 'device' | 'sparkle' | 'frame' | 'arcs';
+export type ServiceArt = 'landing' | 'mvp' | 'speed' | 'handover';
 export const servicesIntro = {
-  title: 'End-To-End\nDesign & Development',
-  lead: 'Whatever You’re Dreaming Of Building, We’ll Help You Get There Faster, With Less Stress And A Product You’re Proud To Show The World.',
+  title: 'Two Services.\nNothing Else.',
+  lead: 'I Only Take On Work I Can Do Exceptionally Well: The Page That Launches Your AI Product, And The First Version Of The Product Itself.',
 };
-export const services: { title: string; slug: string; description: string; tags: string[]; icon: ServiceIcon }[] = [
-  { title: 'UI/UX & Product Design', slug: 'product-design', icon: 'pen', description: 'See Your Idea Come Alive Before A Line Of Code. Figma Prototypes Users Will Love.', tags: ['Figma', 'Design Systems', 'Prototypes'] },
-  { title: 'Web Development', slug: 'web-development', icon: 'asterisk', description: 'Your Website Is Your First Impression. Fast, Beautiful And Built To Win Customers.', tags: ['Next.Js', 'React', 'Webflow', 'CMS'] },
-  { title: 'Mobile App Development', slug: 'mobile-app-development', icon: 'device', description: 'Live On Your Customers’ Home Screens. iOS And Android Apps People Keep, Not Delete.', tags: ['Flutter', 'React Native', 'Native Apps'] },
-  { title: 'SaaS Product Development', slug: 'saas-product-development', icon: 'sparkle', description: 'Stop Waiting For The Perfect Moment. A SaaS That Takes You From Idea To Revenue.', tags: ['Architecture', 'MVPs', 'Subscriptions'] },
-  { title: 'Custom Software Solutions', slug: 'custom-software', icon: 'frame', description: 'Get Your Evenings Back. Software Shaped Around Your Business, So Busywork Runs Itself.', tags: ['Enterprise Systems', 'CRM', 'ERP'] },
-  { title: 'Backend & API Development', slug: 'backend-api-development', icon: 'arcs', description: 'Sleep Well On Launch Day. Rock-Solid Backends That Stay Fast When Traffic Arrives.', tags: ['Node.Js', 'REST APIs', 'Databases'] },
+export const services: {
+  title: string; slug: string; kicker: string; description: string; tags: string[];
+  art: ServiceArt; price: number; timeline: string;
+}[] = [
+  {
+    title: 'Landing Page Development', slug: 'landing-page', art: 'landing', price: 1499, timeline: '1–2 Weeks',
+    kicker: 'Launches, Waitlists & Fundraises',
+    description: 'A Fast Page That Explains Your Model, Agent Or API To Developers And Investors, Then Turns Them Into Sign-Ups.',
+    tags: ['Framer', 'Astro', 'Next.js'],
+  },
+  {
+    title: 'MVP Development', slug: 'mvp', art: 'mvp', price: 3499, timeline: '4–6 Weeks',
+    kicker: 'Pre-Seed & Seed Teams',
+    description: 'The First Real Version Of Your AI Product: One Core Workflow, Built End To End.',
+    tags: ['Next.js', 'FastAPI', 'pgvector', 'LangGraph'],
+  },
+];
+
+/** The two small bento tiles that sit between the services. */
+export const serviceExtras: { title: string; kicker: string; icon: 'bolt' | 'branch'; text: string; art: ServiceArt; tags: string[] }[] = [
+  { title: 'Fast By Default', kicker: 'Performance', icon: 'bolt', text: 'Static-First Builds That Load Instantly And Rank.', art: 'speed', tags: ['Static HTML', 'Edge CDN', 'Web Vitals'] },
+  { title: 'Yours From Day One', kicker: 'Ownership', icon: 'branch', text: 'Your Repo, Your Accounts, A Live Preview Every Week.', art: 'handover', tags: ['GitHub', 'Vercel', 'Docs'] },
 ];
 
 export const process = {
-  title: 'How We\nTurn Ideas Into\nScalable Products',
-  lead: 'We Follow A Transparent, Collaborative Process That Keeps You Involved At Every Stage, From Concept To Launch And Beyond.',
+  title: 'From Idea\nTo Shipped,\nWith One Person',
+  lead: 'The Same Person Scopes, Designs And Builds Your Product, So Nothing Gets Lost In A Hand-Off. You See Progress Every Week.',
   steps: [
-    { title: 'Discover & Align', text: 'We Start By Understanding Your Goals, Users, And Challenges.' },
-    { title: 'Plan & Design', text: 'We Create Clear Design Blueprints Before Development Begins.' },
-    { title: 'Build & Testing', text: 'Every Feature Is Tested For Quality, Security, And Usability.' },
-    { title: 'Launch & Scale', text: 'We Launch Your Product Confidently And Support Its Growth Over Time.' },
+    { title: 'Scope Call', text: '30 Minutes On Your Product, Users And Launch Date. You Leave With A Fixed Quote.' },
+    { title: 'Design', text: 'Copy And Figma Screens For Your Review, Before Any Code Is Written.' },
+    { title: 'Build', text: 'Weekly Demos On A Live Preview URL. You Comment, I Iterate.' },
+    { title: 'Ship & Hand Over', text: 'Deployed On Your Accounts, With The Repo, Docs And 30 Days Of Support.' },
+  ],
+};
+
+export const founder = {
+  name: 'Dhiraj Hazarika',
+  role: 'Founder, MyVakil',
+  linkedin: 'https://www.linkedin.com/in/dhirajbuilds/',
+  title: 'Hi, I’m Dhiraj.\nYou’ll Work\nWith Me.',
+  lead: 'With Quixt, I Design And Build Websites And MVPs For AI Startups, From The First Wireframe To The Production Deploy.',
+  certs: ['Oracle Certified Generative AI Professional', 'Oracle AI Vector Search Certified'],
+  /** Rendered as `git log`; each line is a real milestone from the founder's LinkedIn. */
+  log: [
+    { year: '2026', type: 'ship', text: 'Tessa, An AI Engine For On-Brand Ad Creatives' },
+    { year: '2025', type: 'oss', text: 'Flowgentic, Open-Source Multi-Agent Orchestration' },
+    { year: '2024', type: 'init', text: 'MyVakil, AI For Legal Workflows' },
+    { year: '2021', type: 'role', text: 'Head Of Growth & Tech, InnovEAT Food Tech' },
+    { year: '2020', type: 'init', text: 'Co-Founded myKampus' },
+    { year: '2013', type: 'init', text: 'HostKart, Free Web Hosting, 95,000+ Users' },
   ],
 };
 
 export const pricing = {
-  title: 'Simple,\nTransparent Pricing',
-  lead: 'Choose A Plan That Fits Your Project Goals, No Hidden Costs, No Surprises.',
+  title: 'Two Packages,\nFixed Prices',
+  lead: 'Starting Prices For A Typical Scope. After A Short Call You Get An Exact, Fixed Quote Before Any Work Starts.',
+  note: 'Need Both? Start With The MVP And The Landing Page Is Quoted Alongside It.',
   plans: [
-    { id: 'starter', name: 'Starter Plan', bestFor: 'Small Businesses & MVPs', price: 899, currency: 'USD', featured: false,
-      features: ['Landing Page Or Small Website', 'Responsive Design', 'Basic Backend Setup', 'Performance Optimization', '1 Week Delivery', 'Email Support'] },
-    { id: 'growth', name: 'Growth Plan', bestFor: 'Startups & Scaling Products', price: 2999, currency: 'USD', featured: true,
-      features: ['Full Website Or Web App', 'Custom UI & UX', 'API & Database Integration', 'Authentication System', 'SEO & Performance Setup', '3 Weeks Delivery'] },
+    { id: 'landing-page', name: 'Landing Page', bestFor: 'Launches, Waitlists & Fundraising', price: 1499, currency: 'USD', timeline: '1–2 Weeks', featured: false,
+      features: ['Positioning & Copy', 'Custom Figma Design', 'Framer, Astro Or Next.js', 'Waitlist Or Demo Form', 'SEO + GEO For AI Search', '30 Days Of Support'] },
+    { id: 'mvp', name: 'MVP', bestFor: 'Pre-Seed & Seed AI Startups', price: 3499, currency: 'USD', timeline: '4–6 Weeks', featured: true,
+      features: ['One Core Workflow, End To End', 'Product Design In Figma', 'LLM, RAG Or Agent Integration', 'Auth, Database & Billing', 'Weekly Demos On A Live URL', 'Code Handover + 30 Days Support'] },
   ],
 };
 
@@ -75,9 +109,10 @@ export const testimonials = [
 ];
 
 export const faqs = [
-  { q: 'What Type Of Projects Do You Work On?', a: 'We Work On Websites, Mobile Apps, SaaS Platforms, Custom Software, And Scalable Backend Systems For Startups And Businesses.' },
-  { q: 'How Do We Get Started?', a: 'Share Your Idea Through Our Contact Form Or Book A Free 30-Minute Call. We Reply Within 24 Hours, Then Send A Plain-English Proposal With Scope, A Fixed Price And A Timeline Within Three Days.' },
-  { q: 'Do You Provide Design Along With Development?', a: 'Yes. Every Project Includes UX Research, UI Design And A Clickable Prototype Before Development Starts, So You See Your Product Before It Is Built.' },
-  { q: 'Will You Provide Support After Launch?', a: 'Yes. Every Launch Includes 30 Days Of Free Support, And We Offer Monthly Maintenance Plans Covering Updates, Monitoring, Fixes And New Features.' },
-  { q: 'What Technologies Do You Use?', a: 'We Use Proven, Well-Documented Tools: Next.js, React And Astro For The Web; React Native And Flutter For Mobile; Node.js, PostgreSQL And Redis On The Backend; And AWS For Hosting.' },
+  { q: 'Is Quixt Really Just One Person?', a: 'Yes. Quixt Is Run By Me, Dhiraj Hazarika. You Talk To The Person Designing And Writing Your Code From The First Call To Launch Day, Which Is Also Why I Only Take On A Few Projects At A Time.' },
+  { q: 'Why Only AI And Agent-Infra Startups?', a: 'Because It’s What I Build For Myself. I Work With LLM APIs, RAG, Vector Search And Multi-Agent Orchestration Every Day, So I Can Explain Your Product To Developers And Investors, And Build It Without A Learning Curve.' },
+  { q: 'What Does The $1,499 Landing Page Include?', a: 'Positioning And Copy, A Custom Design, A Fast Build In Framer (If You Want To Edit It Yourself) Or Astro / Next.js (If Your Engineers Will), A Working Waitlist Or Demo Form, SEO And GEO (So AI Search Engines Cite You), Deployed On Your Domain. Most Pages Take One To Two Weeks. Extra Pages Or Docs Are Quoted Up Front.' },
+  { q: 'What Do I Get For $3,499 As An MVP?', a: 'One Core Workflow Built End To End: Auth, A Database, The LLM Or Agent Logic, A Clean UI And Deployment. Most MVPs Take Four To Six Weeks. Bigger Scopes Get A Fixed Quote Before Work Starts, Never An Hourly Bill.' },
+  { q: 'Who Owns The Code?', a: 'You Do, 100%, From Day One. Everything Lives In Your GitHub, Your Hosting And Your Accounts, And You Get A Handover Walkthrough At Launch.' },
+  { q: 'What Happens After Launch?', a: 'Every Project Includes 30 Days Of Free Support For Fixes And Small Tweaks. After That I Can Keep Building With You, Or Hand Over Cleanly To Your Own Engineers.' },
 ];

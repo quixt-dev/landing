@@ -19,11 +19,11 @@ const href = `/projects/${project.slug}/`;
 <style>
   .np { transition: background-color .6s; position: relative; background: var(--cream); overflow: hidden; min-height: 400px; display: grid; }
   .np__art { position: absolute; right: 0; bottom: -2px; width: min(786px, 58%); height: auto; }
-  .np__copy { position: relative; padding: 48px; display: grid; gap: 14px; align-content: start; justify-items: start; }
+  .np__copy { position: relative; padding: 48px; display: grid; gap: 16px; align-content: start; justify-items: start; }
   .np:hover { background: var(--cream-2); }
   .np__name { transition: letter-spacing .8s cubic-bezier(.16,1,.3,1); font-size: clamp(4rem, 8.4vw, 7.5rem); line-height: 1.08; letter-spacing: var(--track-display); word-spacing: var(--words-display); }
   .np:hover .np__name { letter-spacing: -0.025em; }
-  .np__copy :global(.btn) { margin-top: 44px; }
+  .np__copy :global(.btn) { margin-top: 48px; }
   @media (max-width: 760px) { .np { min-height: 560px; } .np__art { width: 100%; } .np__copy { padding: 32px 24px; } }
   @media (max-width: 600px) { .np__copy { padding-left: var(--card-x-m); padding-right: var(--card-x-m); } }   /* unified mobile card inset */
 </style>

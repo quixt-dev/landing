@@ -5,7 +5,8 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   site: 'https://quixt.dev',
   trailingSlash: 'always',
-  build: { format: 'directory' },
+  // CSS is small (~20 KB); inlining it removes the render-blocking round trips before first paint.
+  build: { format: 'directory', inlineStylesheets: 'always' },
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
   integrations: [
     sitemap({

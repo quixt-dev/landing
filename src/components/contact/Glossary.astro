@@ -5,7 +5,7 @@ import { glossary } from '../../data/contact';
 import { glossaryIcons } from '../../lib/graphics/icons';
 ---
 <section class="section container" aria-labelledby="gl-title">
-  <SectionHeader id="gl-title" eyebrow="04 · Jargon, Decoded" title={'Tech Words,\nIn Plain English'} lead="You’ll Hear These On Our Calls. Here’s What They Actually Mean. No Dictionary Required." />
+  <SectionHeader id="gl-title" eyebrow="04 · The Default Stack" title={'The Tools I Reach For,\nAnd Why'} lead="Sensible Defaults For AI Products. If Your Team Already Has A Stack, Yours Wins." />
   <dl class="gl" data-stagger data-each=".08">
     {glossary.map((g) => (
       <div class:list={['term', g.featured && 'term--hot']} id={`term-${g.term.toLowerCase()}`}>
@@ -13,14 +13,14 @@ import { glossaryIcons } from '../../lib/graphics/icons';
           <span class="term__name"><dfn>{g.term}</dfn><span class="aka">{g.aka}</span></span>
           <span class="ic" aria-hidden="true"><Icon paths={glossaryIcons[g.icon]} size={32} viewBox={32} stroke={1.5} /></span>
         </dt>
-        <dd><span class="pe">Plain English</span>{g.definition}</dd>
+        <dd><span class="pe">Why</span>{g.definition}</dd>
       </div>
     ))}
   </dl>
 </section>
 <style>
-  .gl { margin-top: 56px; display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
-  .term { transition: background-color .5s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); background: var(--cream); padding: 30px; display: grid; gap: 36px; align-content: start; }
+  .gl { margin-top: 56px; display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+  .term { transition: background-color .5s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); background: var(--cream); padding: 32px; display: grid; gap: 32px; align-content: start; }
   .term--hot { background: var(--brand); color: var(--white); }
   .term:hover { transform: translateY(-6px); }
   .term:not(.term--hot):hover { background: var(--cream-2); }
@@ -28,7 +28,7 @@ import { glossaryIcons } from '../../lib/graphics/icons';
   .term:hover .ic { transform: scale(1.05); }
   .term:not(.term--hot):hover .ic { background: var(--brand); color: var(--white); }
   .term__top { display: flex; justify-content: space-between; align-items: start; }
-  .term__name { display: grid; gap: 6px; }
+  .term__name { display: grid; gap: 8px; }
   dfn { font-style: normal; font-family: var(--font-display); font-size: 2rem; letter-spacing: var(--track-l); word-spacing: var(--words-l); line-height: 1.2; }
   .aka { font-size: var(--fs-xs); color: var(--brand-ink); }
   .ic { width: 48px; height: 48px; display: grid; place-items: center; background: var(--white); border: 1px solid var(--line); }

@@ -4,10 +4,12 @@ import PricingCard from './PricingCard.astro';
 import { pricing } from '../../data/home';
 ---
 <section id="pricing" class="section container" aria-labelledby="pricing-title">
-  <SectionHeader id="pricing-title" align="center" title={pricing.title} lead={pricing.lead} />
+  <SectionHeader id="pricing-title" align="center" eyebrow="Pricing · USD" title={pricing.title} lead={pricing.lead} />
   <div class="plans" data-stagger data-each=".14">{pricing.plans.map((p) => <PricingCard {...p} />)}</div>
+  <p class="note" data-reveal>{pricing.note}</p>
 </section>
 <style>
-  .plans { margin-top: 58px; display: grid; gap: 22px; }
+  .plans { margin-top: 56px; display: grid; gap: 24px; }
   @media (min-width: 900px) { .plans { grid-template-columns: 1fr 1fr; } }
+  .note { margin-top: 32px; text-align: center; font-size: var(--fs-small); color: var(--brand-ink); }
 </style>

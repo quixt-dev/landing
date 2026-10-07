@@ -11,10 +11,17 @@ export const site = {
   url: 'https://quixt.dev',
   locale: 'en_IN',
   language: 'en',
-  tagline: 'We Build Digital Products That Power Growth',
+  tagline: 'Landing Pages And MVPs For AI Startups',
   description:
-    'Quixt is a design and engineering agency in Guwahati, Assam, India that designs and builds high-performance websites, mobile apps, SaaS products and custom software for startups and growing businesses worldwide.',
-  shortDescription: 'Design and engineering agency crafting websites, apps and software for startups and growing businesses.',
+    'Quixt is a one-person design and engineering studio run by Dhiraj Hazarika in Guwahati, Assam, India. It designs and builds landing pages (from $1,499) and MVPs (from $3,499) for AI and agent-infrastructure startups worldwide.',
+  shortDescription: 'One-person studio building landing pages and MVPs for AI and agent-infra startups.',
+  /** The one person behind the studio (facts from his LinkedIn profile). */
+  founder: {
+    name: 'Dhiraj Hazarika',
+    jobTitle: 'Founder',
+    url: 'https://www.linkedin.com/in/dhirajbuilds/',
+    alumniOf: 'Thapar Institute of Engineering & Technology',
+  },
   email: 'build@quixt.dev',
   phone: '+91 94227 99861',
   phoneHref: '+919422799861',
@@ -48,8 +55,8 @@ export const site = {
     { name: 'X', href: 'https://x.com/quixt' },
   ],
   knowsAbout: [
-    'UI/UX design', 'Figma', 'Web development', 'Mobile app development', 'SaaS product development', 'Custom software development',
-    'Backend and API development', 'Next.js', 'React', 'React Native', 'Flutter', 'Node.js', 'UI/UX design', 'MVP development',
+    'Landing page development', 'Framer', 'MVP development', 'AI product development', 'Large language models', 'Retrieval-augmented generation',
+    'Vector search', 'AI agents', 'Multi-agent orchestration', 'LangGraph', 'Next.js', 'Astro', 'TypeScript', 'Python', 'PostgreSQL', 'UI/UX design',
   ],
   ogImage: '/og/default.png',
 } as const;
@@ -58,12 +65,12 @@ export type NavItem = { label: string; href: string };
 
 export const nav: { left: NavItem[]; right: NavItem[] } = {
   left: [
-    { label: 'Home', href: '/' },
-    { label: 'About', href: '/#about' },
-    { label: 'Service', href: '/#services' },
+    { label: 'Services', href: '/#services' },
+    { label: 'Pricing', href: '/#pricing' },
+    { label: 'About', href: '/#founder' },
   ],
   right: [
-    { label: 'Project', href: '/projects/' },
+    { label: 'Work', href: '/projects/' },
     { label: 'Get In Touch', href: '/contact/' },
   ],
 };
@@ -71,18 +78,15 @@ export const nav: { left: NavItem[]; right: NavItem[] } = {
 export const footerNav = {
   menu: [
     { label: 'Home', href: '/' },
-    { label: 'About Us', href: '/#about' },
+    { label: 'About Dhiraj', href: '/#founder' },
     { label: 'Case Studies', href: '/projects/' },
     { label: 'Pricing', href: '/#pricing' },
-    { label: 'Contact Us', href: '/contact/' },
+    { label: 'Contact', href: '/contact/' },
   ],
   services: [
-    { label: 'UI/UX Design', href: '/#services' },
-    { label: 'Web Development', href: '/#services' },
-    { label: 'Mobile App Development', href: '/#services' },
-    { label: 'SaaS Solutions', href: '/#services' },
-    { label: 'Custom Software', href: '/#services' },
-    { label: 'API Development', href: '/#services' },
+    { label: 'Landing Pages · From $1,499', href: '/#service-landing-page' },
+    { label: 'MVPs · From $3,499', href: '/#service-mvp' },
+    { label: 'Get A Fixed Quote', href: '/contact/' },
   ],
   contact: [
     { label: 'Email Us', href: `mailto:${site.email}` },

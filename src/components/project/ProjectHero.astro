@@ -32,17 +32,17 @@ const ext = cs.liveUrl ?? cs.repoUrl;
   <SpecSheet specs={cs.specs} />
 </section>
 <style>
-  .phero { padding-top: clamp(40px, 4.2vw, 60px); }
+  .phero { padding-top: clamp(40px, 4.2vw, 64px); padding-top: round(clamp(40px, 4.2vw, 64px), 8px); }
   .phero__crumbs { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; }
   .chip:is(a):hover { border-color: var(--brand); }
-  .chip { transition: border-color .3s; display: inline-flex; align-items: center; gap: 10px; padding: 9px 14px; border: 1.5px solid var(--line); font-weight: 500; font-size: 0.8125rem; }
+  .chip { transition: border-color .3s; display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border: 1.5px solid var(--line); font-weight: 500; font-size: 0.8125rem; }
   .chip__dot { width: 8px; height: 8px; background: var(--brand); animation: live 1.8s ease-in-out infinite; }
   @keyframes live { 50% { opacity: .25; transform: scale(.6); } }
   @media (prefers-reduced-motion: reduce) { .chip__dot { animation: none; } }
-  .phero__row { margin-top: clamp(32px, 3.4vw, 48px); display: grid; gap: 32px; }
-  .display { font-size: var(--fs-display); line-height: 1.09; letter-spacing: var(--track-display); word-spacing: var(--words-display); margin-top: 6px; }
-  .phero__intro { display: grid; gap: 26px; max-width: 30rem; }
+  .phero__row { margin-top: clamp(32px, 3.4vw, 48px); margin-top: round(clamp(32px, 3.4vw, 48px), 8px); display: grid; gap: 32px; }
+  .display { font-size: var(--fs-display); line-height: 1.09; letter-spacing: var(--track-display); word-spacing: var(--words-display); margin-top: 8px; }
+  .phero__intro { display: grid; gap: 24px; max-width: 30rem; }
   .phero__ctas { display: flex; flex-wrap: wrap; gap: 12px; }
   .phero__dates { font-size: var(--fs-xs); color: var(--brand-ink); }
-  @media (min-width: 1000px) { .phero__row { grid-template-columns: 1fr auto; align-items: end; } .phero__intro { padding-bottom: 22px; } }
+  @media (min-width: 1000px) { .phero__row { grid-template-columns: 1fr auto; align-items: end; } .phero__intro { padding-bottom: 24px; } }
 </style>

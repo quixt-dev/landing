@@ -22,14 +22,14 @@ const orbits = orbitPositions.map(([x, y]) => {
         <div class="card__art" aria-hidden="true">
           {card.graphic === 'globe' ? (
             <div class="globe" data-globe-wrap>
-              <img src={graphicSrc('dot-globe')} width="240" height="240" alt="" loading="eager" decoding="async" class="globe__fallback" />
+              <img src={graphicSrc('dot-globe')} width="240" height="240" alt="" loading="eager" fetchpriority="high" decoding="async" class="globe__fallback" />
               <canvas class="globe__canvas" data-globe="dot" width="240" height="240"></canvas>
             </div>
           ) : (
             <div class="orbit">
               <svg viewBox="0 0 338 295" width="338" height="295" fill="none" set:html={orbitSvg} />
               {orbits.map((o, i) => (
-                <span class="orbit__dot" style={`--r:${o.r};--a:${o.a}deg;--dur:${o.dur}s;--dir:${o.dir}`}><Avatar index={i + 1} size={22} shape="circle" ring /></span>
+                <span class="orbit__dot" style={`--r:${o.r};--a:${o.a}deg;--dur:${o.dur}s;--dir:${o.dir}`}><Avatar index={i + 1} size={24} shape="circle" ring /></span>
               ))}
             </div>
           )}
@@ -41,9 +41,9 @@ const orbits = orbitPositions.map(([x, y]) => {
 </section>
 <script>import '../../scripts/globes';</script>
 <style>
-  .about { padding-top: clamp(48px, 5.3vw, 76px); }
-  .about__grid { display: grid; gap: 22px; }
-  .card { background: var(--brand); display: grid; grid-template-columns: 1fr; align-items: center; gap: 12px; padding: 28px 24px; min-height: 295px; overflow: hidden; }
+  .about { padding-top: clamp(48px, 5.3vw, 80px); padding-top: round(clamp(48px, 5.3vw, 80px), 8px); }
+  .about__grid { display: grid; gap: 24px; }
+  .card { background: var(--brand); display: grid; grid-template-columns: 1fr; align-items: center; gap: 12px; padding: 32px 24px; min-height: 295px; overflow: hidden; }
   .card__art { display: grid; place-items: center; }
   .globe { position: relative; width: 240px; height: 240px; }
   .globe__fallback, .globe__canvas { position: absolute; inset: 0; width: 100%; height: 100%; transition: opacity .8s; }
@@ -54,7 +54,7 @@ const orbits = orbitPositions.map(([x, y]) => {
   .orbit svg { width: 100%; height: 100%; }
   .orbit :global(.orbit-sweep) { transform-box: view-box; transform-origin: 169px 148px; animation: spin 7s linear infinite; }
   .orbit :global(.orbit-core) { transform-box: view-box; transform-origin: 169px 148px; animation: spin 14s linear infinite reverse; }
-  .orbit__dot { position: absolute; left: 50%; top: 50.17%; width: 22px; height: 22px; margin: -11px 0 0 -11px; line-height: 0;
+  .orbit__dot { position: absolute; left: 50%; top: 50.17%; width: 24px; height: 24px; margin: -12px 0 0 -12px; line-height: 0;
     transform: rotate(calc(var(--a) + var(--spin) * var(--dir))) translateX(calc(var(--r) * 1cqw)) rotate(calc(-1 * (var(--a) + var(--spin) * var(--dir))));
     animation: orbit var(--dur) linear infinite; }
   .orbit__dot :global(.avatar) { transition: transform .4s cubic-bezier(.16,1,.3,1); }
@@ -72,7 +72,7 @@ const orbits = orbitPositions.map(([x, y]) => {
   @media (min-width: 900px) {
     .about__grid { grid-template-columns: 1fr 1fr; }
     .card { grid-template-columns: 336px 1fr; padding: 0; }
-    .card__text { justify-self: start; padding-right: 28px; }
+    .card__text { justify-self: start; padding-right: 32px; }
   }
   @media (max-width: 600px) { .card { padding-left: var(--card-x-m); padding-right: var(--card-x-m); } }   /* unified mobile card inset */
 </style>

@@ -9,6 +9,7 @@ export const ids = {
   org: `${site.url}/#organization`,
   website: `${site.url}/#website`,
   logo: `${site.url}/#logo`,
+  founder: `${site.url}/#founder`,
 };
 
 export const organization = () => ({
@@ -40,7 +41,21 @@ export const organization = () => ({
   contactPoint: [
     { '@type': 'ContactPoint', contactType: 'sales', email: site.email, telephone: site.phoneHref, availableLanguage: ['English', 'Hindi'], areaServed: site.areaServed },
   ],
+  founder: { '@id': ids.founder },
   sameAs: site.socials.map((s) => s.href),
+});
+
+/** The one person who runs the studio. */
+export const founderPerson = () => ({
+  '@type': 'Person',
+  '@id': ids.founder,
+  name: site.founder.name,
+  jobTitle: site.founder.jobTitle,
+  worksFor: { '@id': ids.org },
+  alumniOf: { '@type': 'CollegeOrUniversity', name: site.founder.alumniOf },
+  knowsAbout: site.knowsAbout,
+  url: site.url + '/#founder',
+  sameAs: [site.founder.url],
 });
 
 export const website = () => ({
@@ -81,7 +96,7 @@ export const faqPage = (path: string, faqs: { q: string; a: string }[]) => ({
   mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
 });
 
-export const serviceCatalog = (services: { title: string; slug: string; description: string }[], plans: { name: string; price: number; currency: string; bestFor: string; features: string[] }[]) => ({
+export const serviceCatalog = (services: { title: string; slug: string; description: string }[], plans: { name: string; price: number; currency: string; bestFor: string; timeline: string; features: string[] }[]) => ({
   '@type': 'OfferCatalog',
   '@id': `${site.url}/#services`,
   name: `${site.name} Services`,
@@ -93,7 +108,7 @@ export const serviceCatalog = (services: { title: string; slug: string; descript
     ...plans.map((p) => ({
       '@type': 'Offer',
       name: p.name,
-      description: `Best for ${p.bestFor}: ${p.features.join(', ')}.`,
+      description: `Best for ${p.bestFor}. Typically ships in ${p.timeline.replace('–', ' to ').toLowerCase()}. Includes: ${p.features.join(', ')}.`,
       price: p.price,
       priceCurrency: p.currency,
       priceSpecification: { '@type': 'PriceSpecification', price: p.price, priceCurrency: p.currency, valueAddedTaxIncluded: false, description: 'Starting price' },
@@ -105,7 +120,7 @@ export const serviceCatalog = (services: { title: string; slug: string; descript
 export const definedTermSet = (path: string, terms: { term: string; aka: string; definition: string }[]) => ({
   '@type': 'DefinedTermSet',
   '@id': `${abs(path)}#glossary`,
-  name: 'Tech Words, In Plain English',
+  name: 'The Quixt Stack, In Plain English',
   hasDefinedTerm: terms.map((t) => ({ '@type': 'DefinedTerm', name: t.term, alternateName: t.aka, description: t.definition, inDefinedTermSet: `${abs(path)}#glossary` })),
 });
 

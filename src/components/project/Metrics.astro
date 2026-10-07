@@ -19,8 +19,8 @@ const spark = (i: number, light: boolean) => [0, 1, 2, 3, 4, 5, 6].map((k) => { 
   </ul>
 </section>
 <style>
-  .metrics { margin-top: 56px; display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
-  .metric { position: relative; background: var(--cream); padding: 26px 28px 30px; min-height: 270px; display: grid; grid-template-rows: auto 1fr auto auto; }
+  .metrics { margin-top: 56px; display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+  .metric { position: relative; background: var(--cream); padding: 24px 32px 32px; min-height: 270px; display: grid; grid-template-rows: auto 1fr auto auto; }
   .metric--hot { background: var(--brand); color: var(--white); }
   .metric__i { font-size: var(--fs-xs); color: var(--brand-ink); }
   .metric--hot .metric__i, .metric--hot .metric__n { color: var(--on-brand-muted); }
@@ -34,8 +34,8 @@ const spark = (i: number, light: boolean) => [0, 1, 2, 3, 4, 5, 6].map((k) => { 
   .metric:hover .metric__spark :global(rect:nth-child(4)) { animation-delay: .12s; } .metric:hover .metric__spark :global(rect:nth-child(5)) { animation-delay: .16s; }
   .metric:hover .metric__spark :global(rect:nth-child(6)) { animation-delay: .2s; } .metric:hover .metric__spark :global(rect:nth-child(7)) { animation-delay: .24s; }
   @keyframes bars { 0% { transform: scaleY(1); } 40% { transform: scaleY(.2); } 100% { transform: scaleY(1); } }
-  .metric__v { font-family: var(--font-display); font-size: clamp(3rem, 5.2vw, 4.75rem); line-height: 1.1; letter-spacing: -0.05em; align-self: end; margin-bottom: 14px; }
+  .metric__v { font-family: var(--font-display); font-size: clamp(3rem, 5.2vw, 4.75rem); line-height: 1.1; letter-spacing: -0.05em; align-self: end; margin-bottom: 16px; }
   .metric__l { font-weight: 500; font-size: 1.0625rem; }
-  .metric__n { font-size: var(--fs-small); color: var(--brand-ink); margin-top: 6px; }
+  .metric__n { font-size: var(--fs-small); color: var(--brand-ink); margin-top: 8px; }
   @media (max-width: 600px) { .metric { padding-left: var(--card-x-m); padding-right: var(--card-x-m); } }   /* unified mobile card inset */
 </style>
