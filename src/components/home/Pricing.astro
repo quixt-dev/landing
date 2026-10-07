@@ -4,7 +4,7 @@ import PricingCard from './PricingCard.astro';
 import { pricing } from '../../data/home';
 ---
 <section id="pricing" class="section container" aria-labelledby="pricing-title">
-  <SectionHeader id="pricing-title" align="center" eyebrow="Pricing · USD" title={pricing.title} lead={pricing.lead} />
+  <SectionHeader id="pricing-title" align="center" title={pricing.title} lead={pricing.lead} />
   <div class="plans" data-stagger data-each=".14">{pricing.plans.map((p) => <PricingCard {...p} />)}</div>
   <p class="note" data-reveal>{pricing.note}</p>
 </section>
