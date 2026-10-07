@@ -71,7 +71,7 @@ export const process = {
 
 export const founder = {
   name: 'Dhiraj Hazarika',
-  role: 'Founder, MyVakil',
+  role: 'Founder, Quixt',
   linkedin: 'https://www.linkedin.com/in/dhirajbuilds/',
   title: 'Hi, I’m Dhiraj.\nYou’ll Work\nWith Me.',
   lead: 'With Quixt, I Design And Build Websites And MVPs For AI Startups, From The First Wireframe To The Production Deploy.',
