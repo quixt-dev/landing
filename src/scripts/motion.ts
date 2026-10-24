@@ -237,7 +237,8 @@ function init() {
     const cx = gsap.quickTo(cursor, 'x', { duration: 0.45, ease: 'power3.out' }), cy = gsap.quickTo(cursor, 'y', { duration: 0.45, ease: 'power3.out' });
     window.addEventListener('pointermove', (e) => { cx(e.clientX); cy(e.clientY); cursor.classList.add('is-on'); const t = e.target as HTMLElement;
       const lab = t.closest<HTMLElement>('[data-cursor]'); const link = t.closest('a, button, label, summary, [role="button"], input, select, textarea, canvas');
-      const text = !!t.closest('input:not([type="radio"]):not([type="checkbox"]), textarea, select, [contenteditable], pre');
+      // The square never shows over the navbar: the native pointer is enough there (same switch as text fields, which hides it).
+      const text = !!t.closest('.nav, input:not([type="radio"]):not([type="checkbox"]), textarea, select, [contenteditable], pre');
       cursor.classList.toggle('is-text', text);
       cursor.classList.toggle('is-link', !!link && !lab && !text); cursor.classList.toggle('is-label', !!lab); cursor.classList.toggle('is-grab', !!t.closest('canvas[data-globe="client"]'));
       if (lab) label.textContent = lab.dataset.cursor ?? ''; }, { passive: true });

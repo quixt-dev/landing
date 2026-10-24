@@ -6,6 +6,8 @@
  *   POST /api/brief  ← the 4-step project brief on /contact/ (multipart, optional attachments)
  *   POST /api/book   ← the "Book a free 30-min call" card on /contact/: books the slot on Cal.com
  *                      (which sends the Google Meet invite) and emails INBOX a heads-up
+ *   POST /api/theme-support  ← the Aster theme support form on /themes/aster/support/ (Shopify Theme Store TS-21):
+ *                      emails INBOX with the subject the visitor typed, and sends the visitor an auto-responder
  *
  * Emails go to INBOX via the `send_email` binding. Forms work without JS
  * (303 redirect to /contact/thanks/); with JS they post with `Accept: application/json`.
@@ -34,13 +36,14 @@ const stageLabel = Object.fromEntries(stages.map((s) => [s.value, s.title]));
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
-    if (url.pathname === '/api/brief' || url.pathname === '/api/book') {
+    const kind = ({ '/api/brief': 'brief', '/api/book': 'book', '/api/theme-support': 'theme' } as const)[url.pathname as '/api/brief'];
+    if (kind) {
       if (request.method !== 'POST') return json({ ok: false, error: 'Method not allowed' }, 405, { Allow: 'POST' });
       try {
-        return await handle(url.pathname === '/api/brief' ? 'brief' : 'book', request, env);
+        return await handle(kind, request, env);
       } catch (err) {
         console.error('form error', err);
-        return reply(request, false, 'Something went wrong on our side. Please email build@quixt.dev and we’ll pick it up from there.', 500);
+        return reply(request, false, 'Something went wrong on our side. Please email build@quixt.dev and we’ll pick it up from there.', 500, undefined, kind);
       }
     }
     if (url.pathname.startsWith('/api/')) return json({ ok: false, error: 'Not found' }, 404);
@@ -48,14 +51,15 @@ export default {
   },
 };
 
-async function handle(kind: 'brief' | 'book', request: Request, env: Env): Promise<Response> {
+type Kind = 'brief' | 'book' | 'theme';
+async function handle(kind: Kind, request: Request, env: Env): Promise<Response> {
   // Same-origin only (browsers always send Origin on cross-site POSTs).
   const origin = request.headers.get('Origin');
-  if (origin && new URL(origin).host !== new URL(request.url).host) return reply(request, false, 'Forbidden', 403);
+  if (origin && new URL(origin).host !== new URL(request.url).host) return reply(request, false, 'Forbidden', 403, undefined, kind);
 
   const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
   if (env.RATE_LIMITER && !(await env.RATE_LIMITER.limit({ key: `${kind}:${ip}` })).success) {
-    return reply(request, false, 'Too many submissions in a short time. Please wait a minute and try again.', 429);
+    return reply(request, false, 'Too many submissions in a short time. Please wait a minute and try again.', 429, undefined, kind);
   }
 
   const form = await request.formData();
@@ -63,11 +67,14 @@ async function handle(kind: 'brief' | 'book', request: Request, env: Env): Promi
 
   // Spam traps: hidden honeypot field, and a timestamp the page sets when it loads.
   const started = Number(str('_t'));
-  if (str('_gotcha') || (started && Date.now() - started < MIN_FILL_MS)) return reply(request, true); // pretend success
+  if (str('_gotcha') || (started && Date.now() - started < MIN_FILL_MS)) return reply(request, true, undefined, 200, undefined, kind); // pretend success
 
-  const name = str('name', 120);
+  const name = kind === 'theme' ? `${str('first_name', 60)} ${str('last_name', 60)}`.trim() : str('name', 120);
   const email = str('email', 200);
-  if (!name || !isEmail(email)) return reply(request, false, 'Please add your name and a valid email address.', 422);
+  if (!name || !isEmail(email)) return reply(request, false, 'Please add your name and a valid email address.', 422, undefined, kind);
+  if (kind === 'theme' && (!str('first_name') || !str('last_name') || !str('store_url') || !str('subject') || !str('description'))) {
+    return reply(request, false, 'Please fill in your first and last name, store URL, subject and a description of the problem.', 422, undefined, kind);
+  }
 
   const cf = (request as Request & { cf?: { city?: string; country?: string } }).cf;
   const meta: Row[] = [
@@ -77,7 +84,7 @@ async function handle(kind: 'brief' | 'book', request: Request, env: Env): Promi
   ];
 
   let subject: string, intro: string, rows: Row[], message = '';
-  let bookedStart = '', meetingUrl = '';
+  let bookedStart = '', meetingUrl = '', themeTyped = '';
   const attachments: { content: ArrayBuffer; filename: string; type: string; disposition: 'attachment' }[] = [];
   const skipped: string[] = [];
 
@@ -90,24 +97,31 @@ async function handle(kind: 'brief' | 'book', request: Request, env: Env): Promi
       ['Budget', str('budget', 60)], ['Timeline', str('timeline', 60)], ['Plan', str('plan', 60)],
       ['NDA first', str('nda') === 'yes' ? 'Yes, send an NDA before the call' : 'No'],
     ];
-    let total = 0;
-    for (const f of form.getAll('attachment')) {
-      if (typeof f === 'string' || !f.size) continue;
-      if (total + f.size > MAX_ATTACH_BYTES || attachments.length >= 10) { skipped.push(`${f.name} (${kb(f.size)})`); continue; }
-      total += f.size;
-      attachments.push({ content: await f.arrayBuffer(), filename: f.name.slice(0, 120), type: f.type || 'application/octet-stream', disposition: 'attachment' });
-    }
+    await collectAttachments(form, attachments, skipped);
     if (attachments.length) rows.push(['Attachments', attachments.map((a) => a.filename).join(', ')]);
     if (skipped.length) rows.push(['Not attached (too large)', `${skipped.join(', ')}. Ask the client to send these by email.`]);
     subject = `New project brief · ${name} · ${build}`;
     intro = `${name} sent a project brief from quixt.dev.`;
+  } else if (kind === 'theme') {
+    // Aster theme support (Theme Store TS-21): the subject the visitor typed becomes the email subject (TS-21.18).
+    const typed = str('subject', 140), store = str('store_url', 200);
+    message = str('description', 4000);
+    rows = [
+      ['Name', name], ['Email', email], ['Store URL', store], ['Theme', str('theme', 60)], ['Theme version', str('version', 40)],
+    ];
+    await collectAttachments(form, attachments, skipped);
+    if (attachments.length) rows.push(['Attachments', attachments.map((a) => a.filename).join(', ')]);
+    if (skipped.length) rows.push(['Not attached (too large)', `${skipped.join(', ')}. Ask them to send a link instead.`]);
+    subject = `[Aster support] ${typed}`;
+    intro = `${name} needs help with the Aster theme (${store}).`;
+    themeTyped = typed;
   } else {
     // The card sends the exact slot start (ISO, from Cal.com slots) and the visitor's timezone.
     const startAt = new Date(str('start', 40));
-    if (Number.isNaN(+startAt) || +startAt < Date.now()) return reply(request, false, 'Please pick a time from the calendar.', 422);
+    if (Number.isNaN(+startAt) || +startAt < Date.now()) return reply(request, false, 'Please pick a time from the calendar.', 422, undefined, kind);
     const tz = str('tz', 60), timeZone = isTz(tz) ? tz : 'Asia/Kolkata';
     const booked = await calBook(env, { start: startAt.toISOString(), name, email, timeZone });
-    if (!booked.ok) return reply(request, false, booked.error, booked.status);
+    if (!booked.ok) return reply(request, false, booked.error, booked.status, undefined, kind);
     bookedStart = booked.start; meetingUrl = booked.meetingUrl;
     const when = (zone: string) => startAt.toLocaleString('en-GB', { timeZone: zone, weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
     rows = [
@@ -128,13 +142,47 @@ async function handle(kind: 'brief' | 'book', request: Request, env: Env): Promi
     text: renderText(intro, rows.filter(([, v]) => v), message, meta.filter(([, v]) => v)),
     ...(attachments.length ? { attachments } : {}),
   };
-  if (kind === 'brief') await env.EMAIL.send(mail);
+  if (kind === 'brief' || kind === 'theme') await env.EMAIL.send(mail);
   else {
     // The booking already exists on Cal.com (and the invite is sent); a failed heads-up email must not undo that.
     try { await env.EMAIL.send(mail); } catch (err) { console.error('booking notification failed', err); }
   }
 
-  return reply(request, true, undefined, 200, kind === 'book' ? { start: bookedStart, meetingUrl } : undefined);
+  if (kind === 'theme') {
+    // Auto-responder (TS-21.16). Best effort: it never undoes a request that already reached the inbox, and it only
+    // delivers once the Email binding may send to visitors' addresses (see the note on `send_email` in wrangler.jsonc).
+    try { await env.EMAIL.send(autoReply(env, name, email, themeTyped)); } catch (err) { console.error('auto-responder failed', err); }
+  }
+
+  return reply(request, true, undefined, 200, kind === 'book' ? { start: bookedStart, meetingUrl } : undefined, kind);
+}
+
+async function collectAttachments(form: FormData, attachments: { content: ArrayBuffer; filename: string; type: string; disposition: 'attachment' }[], skipped: string[]) {
+  let total = 0;
+  for (const f of form.getAll('attachment')) {
+    if (typeof f === 'string' || !f.size) continue;
+    if (total + f.size > MAX_ATTACH_BYTES || attachments.length >= 10) { skipped.push(`${f.name} (${kb(f.size)})`); continue; }
+    total += f.size;
+    attachments.push({ content: await f.arrayBuffer(), filename: f.name.slice(0, 120), type: f.type || 'application/octet-stream', disposition: 'attachment' });
+  }
+}
+
+/** The confirmation the visitor gets right after sending the Aster support form. */
+function autoReply(env: Env, name: string, email: string, subject: string) {
+  const first = name.split(' ')[0] || 'there';
+  const text = `Hi ${first},\n\nThanks for contacting Aster support. We received your message "${subject}" and we reply within 2 business days (Monday to Friday, 10:00 to 19:00 IST).\n\nTo help us solve it quickly, you can reply to this email with screenshots, a short screen recording, or the theme version from Theme settings.\n\nPlease do not send your store password. If we need access, we will send a collaborator request from your Shopify admin.\n\nIn the meantime the documentation may already have the answer: https://quixt.dev/themes/aster/docs/\n\nQuixt\n`;
+  const html = `<!doctype html><html><body style="margin:0;background:#fdf4ef;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;line-height:1.6;color:#1e0d04">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#fff;border:1px solid #f1dccd">
+<tr><td style="background:#ab4200;color:#fff;padding:20px 28px;font-size:18px;letter-spacing:-.02em">quixt <span style="opacity:.75;font-size:13px">· Aster support</span></td></tr>
+<tr><td style="padding:28px">
+<p style="margin:0 0 16px;font-size:16px">Hi ${esc(first)},</p>
+<p style="margin:0 0 16px">Thanks for contacting Aster support. We received your message <strong>“${esc(subject)}”</strong> and we reply within <strong>2 business days</strong> (Monday to Friday, 10:00 to 19:00 IST).</p>
+<p style="margin:0 0 16px">To help us solve it quickly, reply to this email with screenshots, a short screen recording, or the theme version from Theme settings.</p>
+<p style="margin:0 0 16px;background:#fdf4ef;padding:14px 16px">Please do not send your store password. If we need access, we will send a collaborator request from your Shopify admin.</p>
+<p style="margin:0">The <a href="https://quixt.dev/themes/aster/docs/" style="color:#ab4200">documentation</a> may already have the answer.</p>
+</td></tr></table></td></tr></table></body></html>`;
+  return { to: email, from: { email: env.SENDER, name: 'Quixt' }, replyTo: { email: env.INBOX, name: 'Quixt' }, subject: `We received your message: ${subject}`, html, text };
 }
 
 /* ------------------------------------------------------------ Cal.com */
@@ -165,10 +213,11 @@ async function calBook(env: Env, b: { start: string; name: string; email: string
 
 type Row = [string, string];
 
-function reply(request: Request, ok: boolean, error?: string, status = ok ? 200 : 400, extra?: Record<string, string>): Response {
+function reply(request: Request, ok: boolean, error?: string, status = ok ? 200 : 400, extra?: Record<string, string>, kind: Kind = 'brief'): Response {
   if ((request.headers.get('Accept') ?? '').includes('application/json')) return json(ok ? { ok, ...extra } : { ok, error }, status);
-  if (ok) return Response.redirect(new URL('/contact/thanks/', request.url).toString(), 303);
-  return new Response(page(error ?? 'Something went wrong.'), { status, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+  const thanks = kind === 'theme' ? '/themes/aster/support/thanks/' : '/contact/thanks/';
+  if (ok) return Response.redirect(new URL(thanks, request.url).toString(), 303);
+  return new Response(page(error ?? 'Something went wrong.', kind), { status, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
 }
 
 function json(body: unknown, status = 200, headers: Record<string, string> = {}): Response {
@@ -200,8 +249,9 @@ function renderText(intro: string, rows: Row[], message: string, meta: Row[]): s
   return `${intro}\n\n${lines(rows)}\n${message ? `\nIn their words:\n${message}\n` : ''}\nReply to this email to answer them directly.\n\n—\n${lines(meta)}\n`;
 }
 
-function page(error: string): string {
+function page(error: string, kind: Kind = 'brief'): string {
+  const back = kind === 'theme' ? '/themes/aster/support/' : '/contact/#brief';
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Couldn’t send · Quixt</title>
 <style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#fdf4ef;color:#ab4200;font:15px/1.6 ui-monospace,Menlo,monospace;padding:24px}main{max-width:520px}a{color:#ab4200}</style></head>
-<body><main><h1 style="font-weight:400">We couldn’t send that.</h1><p>${esc(error)}</p><p><a href="/contact/#brief">← Back to the form</a> · <a href="mailto:build@quixt.dev">build@quixt.dev</a></p></main></body></html>`;
+<body><main><h1 style="font-weight:400">We couldn’t send that.</h1><p>${esc(error)}</p><p><a href="${back}">← Back to the form</a> · <a href="mailto:build@quixt.dev">build@quixt.dev</a></p></main></body></html>`;
 }

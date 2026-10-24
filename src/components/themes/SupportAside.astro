@@ -1,0 +1,41 @@
+---
+/** Side column of the support page: the support policy (TS-21.8), the docs link and a direct email line. */
+import { aster, supportPolicy } from '../../data/aster';
+import { site } from '../../data/site';
+---
+<aside class="side" aria-label="Support policy" data-stagger data-each=".12">
+  <section class="card pol">
+    <h2 class="h4">Support Policy</h2>
+    <dl>{supportPolicy.map((p) => <div><dt>{p.term}</dt><dd>{p.text}</dd></div>)}</dl>
+  </section>
+  <section class="card docs">
+    <p class="eyebrow">Before You Write</p>
+    <h2 class="h4">Check The Docs</h2>
+    <p>Most setup questions are answered in the guide, with the exact setting names.</p>
+    <a class="go" href={aster.docsPath}>Open The Documentation <span aria-hidden="true">→</span></a>
+  </section>
+  <section class="card direct on-brand dot-grid">
+    <p class="eyebrow">Prefer Email?</p>
+    <a class="mail" href={`mailto:${site.email}?subject=Aster%20theme%20support`}>{site.email}</a>
+    <p class="note">Mon–Fri, 10:00–19:00 IST · Reply Within {aster.responseDays} Business Days</p>
+  </section>
+</aside>
+<style>
+  .side { display: grid; gap: 16px; align-content: start; }
+  .card { padding: 32px; background: var(--cream); display: grid; gap: 16px; align-content: start; transition: transform .7s cubic-bezier(.16,1,.3,1); }
+  .card:hover { transform: translateY(-4px); }
+  .pol dl { display: grid; gap: 0; }
+  .pol dl > div { display: grid; grid-template-columns: 104px 1fr; gap: 16px; padding: 12px 0; border-top: 1px solid var(--line-soft); }
+  dt { font-weight: 500; font-size: var(--fs-small); }
+  dd { font-size: var(--fs-small); line-height: 1.6; color: var(--brand-ink); }
+  .docs p:not(.eyebrow) { font-size: var(--fs-small); line-height: 1.6; color: var(--brand-ink); }
+  .go { display: inline-flex; gap: 8px; align-items: center; font-weight: 500; justify-self: start; }
+  .go span { transition: transform .5s cubic-bezier(.16,1,.3,1); }
+  .go:hover span { transform: translateX(6px); }
+  .go:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .direct { background: var(--brand); }
+  .mail { font-family: var(--font-display); font-size: var(--fs-h4); letter-spacing: var(--track-m); word-spacing: var(--words-m); overflow-wrap: anywhere; justify-self: start; background: linear-gradient(currentColor, currentColor) 0 100% / 0 1.5px no-repeat; transition: background-size .45s cubic-bezier(.16,1,.3,1); }
+  .mail:hover { background-size: 100% 1.5px; }
+  .note { font-size: var(--fs-xs); color: var(--on-brand-muted); }
+  @media (max-width: 600px) { .card { padding-left: var(--card-x-m); padding-right: var(--card-x-m); } .pol dl > div { grid-template-columns: 1fr; gap: 4px; } }
+</style>
