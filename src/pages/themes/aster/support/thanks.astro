@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import Button from '../../../../components/ui/Button.astro';
+import { aster } from '../../../../data/aster';
+---
+<BaseLayout title="Support Message Received" description="Thanks for contacting Aster theme support. We reply within two business days." noindex>
+  <section class="container ty">
+    <p class="eyebrow">Aster Support · Sent</p>
+    <h1 class="h1">Message Received.<br />We’re On It.</h1>
+    <p class="lead">Thank You. We Reply Within {aster.responseDays} Business Days, And A Confirmation Is On Its Way To Your Inbox. Check Your Spam Folder If You Don’t See It.</p>
+    <div class="btns"><Button href={aster.docsPath} variant="solid">Read The Docs</Button><Button href="/">Back To Home</Button></div>
+  </section>
+</BaseLayout>
+<style>
+  .ty { padding-block: clamp(80px, 12vw, 176px) 40px; padding-block: round(clamp(80px, 12vw, 176px), 8px) 40px; display: grid; gap: 24px; justify-items: start; }
+  .lead { max-width: 60ch; }
+  .btns { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+</style>

@@ -1,0 +1,50 @@
+---
+/** Hero for the Aster theme pages (docs, support). Same grammar as the Contact hero: eyebrow, split headline, lead, chips, and an orange dot-grid card. */
+import Breadcrumbs from '../ui/Breadcrumbs.astro';
+import Lines from '../ui/Lines.astro';
+import { aster, asterFacts } from '../../data/aster';
+export interface Props { eyebrow: string; title: string; lead: string; crumbs: { name: string; href?: string }[]; chips?: string[] }
+const { eyebrow, title, lead, crumbs, chips = [] } = Astro.props;
+---
+<section class="thero container" aria-labelledby="thero-title">
+  <div class="thero__copy">
+    <Breadcrumbs items={crumbs} />
+    <p class="eyebrow" data-scramble="load">{eyebrow}</p>
+    <h1 id="thero-title" class="thero__title" data-split="load" data-delay=".1"><Lines text={title} /></h1>
+    <p class="lead" data-reveal="load" data-delay=".4">{lead}</p>
+    {chips.length > 0 && <ul class="chips" role="list" data-stagger="load" data-delay=".6" data-each=".08">{chips.map((c) => <li><span aria-hidden="true"></span>{c}</li>)}</ul>}
+    <div class="thero__slot" data-reveal="load" data-delay=".8"><slot /></div>
+  </div>
+  <div class="card on-brand dot-grid" data-reveal="load" data-delay=".3">
+    <p class="card__top"><span aria-hidden="true"></span>A Shopify Theme By Quixt</p>
+    <p class="card__word" aria-hidden="true">{aster.name.toLowerCase()}</p>
+    <dl class="card__facts">
+      {asterFacts.map((f) => <div><dt>{f.label}</dt><dd>{f.value}</dd></div>)}
+    </dl>
+  </div>
+</section>
+<style>
+  .thero { padding-top: clamp(48px, 5vw, 72px); padding-top: round(clamp(48px, 5vw, 72px), 8px); display: grid; gap: 40px; }
+  .thero__copy { display: grid; gap: 24px; align-content: end; justify-items: start; }
+  .thero__title { font-size: var(--fs-h1-xl); line-height: 1.18; letter-spacing: var(--track-xl); word-spacing: var(--words-xl); }
+  .thero .lead { max-width: 37.5rem; margin-top: 4px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chips li { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1.5px solid var(--line); font-weight: 500; font-size: 0.8125rem; transition: background-color .35s, color .35s, transform .45s cubic-bezier(.16,1,.3,1); }
+  .chips li span { width: 7px; height: 7px; background: var(--brand); transition: background-color .35s; }
+  .chips li:hover { background: var(--brand); color: var(--white); transform: translateY(-3px); }
+  .chips li:hover span { background: var(--white); }
+  .thero__slot { display: flex; flex-wrap: wrap; gap: 12px; }
+  .thero__slot:empty { display: none; }
+  .card { position: relative; background: var(--brand); aspect-ratio: 580 / 460; overflow: hidden; display: grid; grid-template-rows: auto 1fr auto; padding: 24px; font-size: var(--fs-xs); }
+  .card__top { display: inline-flex; gap: 8px; align-items: center; justify-self: start; padding: 8px 12px; background: rgb(255 255 255 / .12); border: 1px solid rgb(255 255 255 / .35); font-weight: 500; }
+  .card__top span { width: 7px; height: 7px; background: var(--white); animation: live 1.8s ease-in-out infinite; }
+  @keyframes live { 50% { opacity: .25; transform: scale(.6); } }
+  .card__word { align-self: center; justify-self: center; font-family: var(--font-display); font-size: clamp(5rem, 14vw, 9.5rem); line-height: 1; letter-spacing: var(--track-display); transition: transform .9s cubic-bezier(.16,1,.3,1); }
+  .card:hover .card__word { transform: scale(1.04) rotate(-1.5deg); }
+  .card__facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; border-top: 1px solid var(--line-on-brand); padding-top: 16px; }
+  .card__facts dt { font-size: 0.72rem; color: var(--on-brand-muted); }
+  .card__facts dd { font-family: var(--font-display); font-size: 1.0625rem; margin-top: 2px; }
+  @media (prefers-reduced-motion: reduce) { .card__top span { animation: none; } }
+  @media (max-width: 560px) { .card { aspect-ratio: 1 / 0.9; padding: 16px; } .card__facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 1000px) { .thero { grid-template-columns: 1fr 580px; align-items: end; } }
+</style>

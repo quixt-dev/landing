@@ -1,0 +1,99 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ThemeHero from '../../../components/themes/ThemeHero.astro';
+import DocBlocks from '../../../components/themes/DocBlocks.astro';
+import Button from '../../../components/ui/Button.astro';
+import FAQ from '../../../components/home/FAQ.astro';
+import { site } from '../../../data/site';
+import { aster, docSections, docsFaqs } from '../../../data/aster';
+import { graph, organization, website, webPage, breadcrumbs, faqPage } from '../../../lib/schema';
+
+const path = aster.docsPath;
+const title = 'Aster Theme Documentation · Setup Guide For Shopify';
+const description = 'How to set up and edit the Aster Shopify theme: presets, theme settings, sections, product page, collections, cart and support. Written for store owners, no code needed.';
+const jsonLd = graph(
+  organization(), website(),
+  { ...webPage({ path, title, description, type: 'TechArticle', breadcrumbs: true, dateModified: '2026-10-24' }), headline: 'Aster theme documentation', about: { '@type': 'SoftwareApplication', name: 'Aster', applicationCategory: 'Shopify theme', operatingSystem: aster.platform, softwareVersion: aster.version, publisher: { '@id': `${site.url}/#organization` } } },
+  breadcrumbs(path, [{ name: 'Home', path: '/' }, { name: 'Aster Theme', path }, { name: 'Documentation', path }]),
+  faqPage(path, docsFaqs),
+);
+---
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+  <ThemeHero
+    eyebrow={`Aster Theme · Documentation · Version ${aster.version}`}
+    title={'Set Up Aster,\nOne Section At A Time.'}
+    lead="Everything you need to install the theme, choose a preset and edit every page in the Shopify theme editor. No code needed."
+    crumbs={[{ name: 'Home', href: '/' }, { name: 'Aster Theme', href: aster.docsPath }, { name: 'Documentation' }]}
+    chips={['Two Presets', 'No Apps Needed', 'Edit In The Theme Editor']}
+  >
+    <Button href={aster.supportPath} variant="solid">Contact Support</Button>
+    <Button href="#faq">Read The FAQ</Button>
+  </ThemeHero>
+
+  <div class="docs container section">
+    <nav class="toc" aria-label="On this page" data-toc>
+      <p class="toc__t">On This Page</p>
+      <ol role="list">
+        {docSections.map((s) => <li><a href={`#${s.id}`}>{s.title}</a></li>)}
+        <li><a href="#faq">Frequently Asked Questions</a></li>
+        <li><a href="#support">Support</a></li>
+      </ol>
+    </nav>
+    <div class="doc">
+      {docSections.map((s) => (
+        <section id={s.id} class="ds" aria-labelledby={`${s.id}-h`} data-doc-section>
+          <header class="ds__head" data-reveal>
+            <h2 id={`${s.id}-h`} class="h3 ds__title">{s.title}</h2>
+            {s.intro && <p class="lead ds__intro">{s.intro}</p>}
+          </header>
+          <div data-reveal><DocBlocks blocks={s.blocks} /></div>
+        </section>
+      ))}
+    </div>
+  </div>
+
+  <FAQ items={docsFaqs} layout="split" eyebrow="FAQ" title={'Quick Answers\nFor Store Owners'} lead="Can’t Find It Here? Send Us A Message And We’ll Add It To These Docs." />
+
+  <section id="support" class="section container help" aria-labelledby="support-h">
+    <p class="eyebrow" data-scramble>Support</p>
+    <h2 id="support-h" class="h2" data-split>Stuck? Ask Us.</h2>
+    <p class="lead" data-reveal data-delay=".15">We reply within {aster.responseDays} business days. Include your store URL, the theme version and what you expected.</p>
+    <div class="help__btns" data-stagger><Button href={aster.supportPath} variant="solid">Open The Support Form</Button><Button href={`mailto:${site.email}?subject=Aster%20theme%20support`}>Email Us</Button></div>
+  </section>
+</BaseLayout>
+<script>
+  // Highlights the contents link of the section being read. Pure enhancement: the links work without it.
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-toc] a')];
+  const byId = new Map(links.map((a) => [a.getAttribute('href')!.slice(1), a]));
+  const targets = [...document.querySelectorAll<HTMLElement>('[data-doc-section], #faq, #support')];
+  if ('IntersectionObserver' in window && targets.length) {
+    const set = (id: string) => links.forEach((a) => { const on = a === byId.get(id); a.classList.toggle('is-on', on); if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); });
+    const io = new IntersectionObserver((entries) => {
+      const hit = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+      if (hit) set(hit.target.id);
+    }, { rootMargin: '-96px 0px -60% 0px' });
+    targets.forEach((t) => io.observe(t));
+  }
+</script>
+<style>
+  .docs { display: grid; gap: 48px; align-items: start; }
+  .toc { background: var(--cream); padding: 24px; display: grid; gap: 16px; }
+  .toc__t { font-weight: 500; font-size: var(--fs-small); color: var(--brand-ink); }
+  .toc ol { display: grid; gap: 2px; }
+  .toc a { display: block; padding: 8px 12px; font-size: var(--fs-small); line-height: 1.4; border-left: 2px solid transparent; transition: background-color .35s, border-color .35s, transform .45s cubic-bezier(.16,1,.3,1); }
+  .toc a:hover { background: var(--white); transform: translateX(4px); }
+  .toc a.is-on { background: var(--white); border-left-color: var(--brand); font-weight: 500; }
+  .doc { display: grid; gap: clamp(56px, 7vw, 96px); gap: round(clamp(56px, 7vw, 96px), 8px); min-width: 0; }
+  .ds { display: grid; gap: 32px; scroll-margin-top: 104px; }
+  .ds__head { display: grid; gap: 12px; justify-items: start; padding-bottom: 24px; border-bottom: 1.5px solid var(--line-soft); }
+  .ds__title { max-width: 24ch; }
+  .ds__intro { max-width: 52ch; }
+  .help { display: grid; justify-items: center; text-align: center; gap: 24px; }
+  .help .lead { max-width: 35rem; }
+  .help__btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+  @media (min-width: 1000px) {
+    .docs { grid-template-columns: 296px minmax(0, 1fr); gap: 56px; }
+    .toc { position: sticky; top: 104px; max-height: calc(100vh - 128px); overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--brand-tint) transparent; }
+  }
+  @media (max-width: 600px) { .toc { padding-left: var(--card-x-m); padding-right: var(--card-x-m); } }
+</style>

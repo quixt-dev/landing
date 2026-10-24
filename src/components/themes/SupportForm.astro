@@ -1,0 +1,141 @@
+---
+/**
+ * Aster support request form (Shopify Theme Store TS-21): first and last name, email, store URL with a .myshopify.com example,
+ * a problem description, file upload, an auto-responder (sent by the Worker) and a subject that becomes the email subject.
+ * Works as a plain HTML form; JS posts with fetch so the visitor stays on the page. ?subject= ?store= ?preset= ?version= pre-fill it.
+ */
+import { aster } from '../../data/aster';
+---
+<form class="sf" data-reveal action={aster.supportAction} method="post" enctype="multipart/form-data" data-support aria-labelledby="sf-title">
+  <h2 id="sf-title" class="visually-hidden">Aster Support Request</h2>
+  <input type="hidden" name="_t" value="" data-started />
+  <div class="hp" aria-hidden="true"><label>Leave This Empty <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" /></label></div>
+
+  <fieldset class="grp">
+    <legend><span class="num">01</span>About You And Your Store</legend>
+    <div class="fields">
+      <div class="field"><label for="sf-first">First Name</label><input id="sf-first" name="first_name" type="text" autocomplete="given-name" placeholder="e.g. Priya" required /></div>
+      <div class="field"><label for="sf-last">Last Name</label><input id="sf-last" name="last_name" type="text" autocomplete="family-name" placeholder="e.g. Sharma" required /></div>
+      <div class="field"><label for="sf-email">Email Address</label><input id="sf-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@yourstore.com" required aria-describedby="sf-email-h" /><small id="sf-email-h">We Reply To This Address.</small></div>
+      <div class="field"><label for="sf-store">Store URL</label><input id="sf-store" name="store_url" type="text" inputmode="url" autocomplete="url" placeholder="your-store.myshopify.com" required aria-describedby="sf-store-h" /><small id="sf-store-h">The .myshopify.com Address From Your Shopify Admin, Or Your Own Domain.</small></div>
+      <div class="field"><label for="sf-theme">Theme And Preset</label>
+        <select id="sf-theme" name="theme"><option>Aster · Aster Preset</option><option>Aster · Aster Bone Preset</option><option>Not Sure</option></select>
+      </div>
+      <div class="field"><label for="sf-version">Theme Version</label><input id="sf-version" name="version" type="text" placeholder={`e.g. ${aster.version}`} aria-describedby="sf-version-h" /><small id="sf-version-h">Optional. Find It In Theme Settings.</small></div>
+    </div>
+  </fieldset>
+
+  <fieldset class="grp">
+    <legend><span class="num">02</span>What Do You Need Help With?</legend>
+    <div class="field"><label for="sf-subject">Subject</label><input id="sf-subject" name="subject" type="text" maxlength="140" placeholder="e.g. The Hero Image Looks Cropped On Phones" required aria-describedby="sf-subject-h" /><small id="sf-subject-h">This Becomes The Subject Of The Email We Receive.</small></div>
+    <div class="field">
+      <label for="sf-desc">Describe The Problem</label>
+      <div class="area">
+        <textarea id="sf-desc" name="description" rows="7" maxlength="4000" required data-count placeholder="What You Expected, What Happened, And The Page Or Section It Is On. Steps To Repeat It Help A Lot."></textarea>
+        <div class="area__foot">
+          <label class="attach" for="sf-file"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M9.5 4.5L4.8 9.2C3.9 10.1 3.9 11.2 4.6 11.9C5.3 12.6 6.4 12.6 7.3 11.7L12 7C13.4 5.6 13.4 3.6 12.2 2.4C11 1.2 9 1.2 7.6 2.6L2.8 7.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Attach Screenshots Or A Recording</label>
+          <input id="sf-file" class="visually-hidden" type="file" name="attachment" multiple accept="image/*,video/mp4,video/quicktime,application/pdf" />
+          <span class="count" data-counter aria-live="polite">0 / 4000</span>
+        </div>
+      </div>
+    </div>
+    <p class="hint">Please Do Not Include Passwords. If We Need Access, We’ll Send A Collaborator Request From Your Shopify Admin.</p>
+  </fieldset>
+
+  <div class="submit">
+    <p class="reply"><strong>We Reply Within {aster.responseDays} Business Days</strong><small>You’ll Get A Confirmation Email Right Away.</small></p>
+    <button type="submit" class="send" data-fill data-send>Send Message <span aria-hidden="true">→</span></button>
+  </div>
+  <p class="status" data-status role="status" aria-live="polite" hidden></p>
+  <div class="done" data-done tabindex="-1" hidden>
+    <span class="done__mark" aria-hidden="true">✓</span>
+    <h3 class="done__title">Message Received.</h3>
+    <p class="done__text">Thank You. We’ve Sent A Confirmation To Your Email, And We Reply Within {aster.responseDays} Business Days. Check Your Spam Folder If You Don’t See It.</p>
+  </div>
+</form>
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-support]');
+  if (form) {
+    const $ = <T extends HTMLElement>(s: string) => form.querySelector<T>(s)!;
+    const params = new URLSearchParams(location.search);
+    const fill = (name: string, v: string | null) => { const el = form.elements.namedItem(name) as HTMLInputElement | null; if (el && v) el.value = v; };
+    fill('subject', params.get('subject')); fill('store_url', params.get('store')); fill('version', params.get('version'));
+    const preset = params.get('preset')?.toLowerCase();
+    if (preset) { const sel = $<HTMLSelectElement>('#sf-theme'); const o = [...sel.options].find((x) => x.text.toLowerCase().includes(preset)); if (o) sel.value = o.value; }
+    $<HTMLInputElement>('[data-started]').value = String(Date.now());
+
+    const ta = $<HTMLTextAreaElement>('[data-count]'), counter = $('[data-counter]');
+    ta.addEventListener('input', () => (counter.textContent = `${ta.value.length} / 4000`));
+    const status = $('[data-status]'), send = $<HTMLButtonElement>('[data-send]'), doneEl = $('[data-done]'), files = $<HTMLInputElement>('#sf-file');
+    const say = (msg: string, bad = false) => { status.hidden = !msg; status.textContent = msg; status.classList.toggle('status--bad', bad); };
+    files.addEventListener('change', () => {
+      const total = [...(files.files ?? [])].reduce((n, f) => n + f.size, 0);
+      say(total > 3.5 * 1024 * 1024 ? 'Files Over 3.5 MB In Total Won’t Fit In The Email. Attach Smaller Ones, Or Paste A Link To A Recording.' : files.files?.length ? `${files.files.length} File${files.files.length > 1 ? 's' : ''} Attached.` : '', total > 3.5 * 1024 * 1024);
+    });
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!form.reportValidity()) return;
+      const label = send.innerHTML;
+      send.disabled = true; send.textContent = 'Sending…'; say('');
+      try {
+        const res = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } });
+        const data = await res.json().catch(() => ({ ok: false }));
+        if (!res.ok || !data.ok) throw new Error(data.error || 'Couldn’t Send Your Message. Please Try Again.');
+        [...form.children].forEach((el) => { if (el !== doneEl) (el as HTMLElement).hidden = true; });
+        doneEl.hidden = false; doneEl.focus({ preventScroll: true });
+        doneEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } catch (err) {
+        say((err as Error).message || 'Couldn’t Send Your Message. Please Try Again Or Email build@quixt.dev.', true);
+        send.disabled = false; send.innerHTML = label;
+      }
+    });
+  }
+</script>
+<style>
+  .sf { background: var(--cream); padding: clamp(24px, 3vw, 40px); padding: round(clamp(24px, 3vw, 40px), 8px); display: grid; gap: 40px; min-width: 0; }
+  .hp { position: absolute; left: -9999px; }
+  fieldset { border: 0; padding: 0; min-width: 0; display: grid; gap: 16px; }
+  .grp:first-of-type { padding-bottom: 40px; border-bottom: 1.5px solid var(--line-soft); }
+  legend { display: flex; align-items: center; gap: 16px; font-family: var(--font-display); font-size: var(--fs-h4); line-height: 1.3; letter-spacing: var(--track-m); word-spacing: var(--words-m); padding: 0; margin-bottom: 8px; float: left; width: 100%; }
+  legend + * { clear: both; }
+  .num { flex: none; width: 32px; height: 32px; display: grid; place-items: center; font-family: var(--font-body); font-size: 0.78rem; font-weight: 500; background: var(--brand); border: 1.2px solid var(--brand); color: var(--white); letter-spacing: 0; }
+  .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .field { display: grid; gap: 8px; align-content: start; }
+  .field label { font-weight: 500; font-size: 0.78rem; color: var(--brand-ink); }
+  .field small { font-size: 0.72rem; color: var(--brand-ink); line-height: 1.5; }
+  .field input, .field select { width: 100%; padding: 16px 16px; background: var(--white); border: 1.2px solid rgb(171 66 0 / .28); font-size: 0.875rem; color: var(--brand); border-radius: 0; appearance: none; transition: border-color .3s, box-shadow .3s; }
+  .field select { background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23AB4200' stroke-width='1.5'/%3E%3C/svg%3E") right 16px center no-repeat; padding-right: 40px; }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--brand); box-shadow: inset 0 0 0 .5px var(--brand); }
+  .field input:user-invalid { border-color: #c2261a; }
+  input::placeholder, textarea::placeholder { color: var(--brand-ink); opacity: .75; }
+  .area { background: var(--white); border: 1.2px solid rgb(171 66 0 / .3); transition: border-color .3s; }
+  .area:focus-within { border-color: var(--brand); }
+  textarea { display: block; width: 100%; min-height: 160px; resize: vertical; border: 0; background: transparent; padding: 16px; font-size: 0.875rem; line-height: 1.64; color: var(--brand); border-radius: 0; }
+  textarea:focus { outline: none; }
+  .area__foot { position: relative; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding: 0 16px 16px; font-size: 0.75rem; }
+  .area__foot input[type='file'] { left: 0; top: 0; }
+  .attach { display: inline-flex; gap: 8px; align-items: center; font-weight: 500; cursor: pointer; }
+  .attach:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .area__foot:has(input:focus-visible) .attach { outline: 2px solid var(--brand); outline-offset: 3px; }
+  .count { color: var(--brand-ink); }
+  .hint { font-size: 0.78rem; color: var(--brand-ink); }
+  .submit { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; padding-top: 32px; border-top: 1.5px solid var(--line-soft); }
+  .reply strong { display: block; font-size: 0.875rem; }
+  .reply small { display: block; font-size: 0.75rem; color: var(--brand-ink); }
+  .send { position: relative; overflow: hidden; isolation: isolate; display: inline-flex; gap: 12px; align-items: center; padding: 16px 32px; background: var(--brand); color: var(--white); font-weight: 500; font-size: 1rem; }
+  .send::before { content: ''; position: absolute; inset: -1px; z-index: -1; background: #7a2f00; clip-path: circle(0% at var(--fx, 50%) var(--fy, 100%)); transition: clip-path .7s cubic-bezier(.16,1,.3,1); }
+  .send:hover::before, .send:focus-visible::before { clip-path: circle(150% at var(--fx, 50%) var(--fy, 100%)); }
+  .send span { display: inline-block; transition: transform .5s cubic-bezier(.16,1,.3,1); }
+  .send:hover span { transform: translateX(6px); }
+  .send:disabled { opacity: .7; cursor: progress; }
+  .sf > [hidden] { display: none !important; }
+  .status { font-size: 0.8125rem; color: var(--brand-ink); margin-top: -16px; }
+  .status--bad { color: #c2261a; }
+  .done { display: grid; gap: 16px; justify-items: start; padding: clamp(24px, 4vw, 56px) 0; padding: round(clamp(24px, 4vw, 56px), 8px) 0; outline: none; animation: in .8s cubic-bezier(.16,1,.3,1); }
+  .done[hidden] { display: none; }
+  @keyframes in { from { opacity: 0; transform: translateY(6px); } }
+  .done__mark { width: 56px; height: 56px; display: grid; place-items: center; background: var(--brand); color: var(--white); font-size: 1.5rem; }
+  .done__title { font-family: var(--font-display); font-weight: 400; font-size: var(--fs-h3); letter-spacing: var(--track-l); word-spacing: var(--words-l); line-height: 1.2; }
+  .done__text { max-width: 52ch; color: var(--brand-ink); font-size: 0.9375rem; }
+  @media (max-width: 600px) { .sf { padding-left: var(--card-x-m); padding-right: var(--card-x-m); } }
+</style>

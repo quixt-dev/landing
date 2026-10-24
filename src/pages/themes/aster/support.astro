@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ThemeHero from '../../../components/themes/ThemeHero.astro';
+import SupportForm from '../../../components/themes/SupportForm.astro';
+import SupportAside from '../../../components/themes/SupportAside.astro';
+import FAQ from '../../../components/home/FAQ.astro';
+import { aster, supportFaqs } from '../../../data/aster';
+import { graph, organization, website, webPage, breadcrumbs, faqPage, ids } from '../../../lib/schema';
+
+const path = aster.supportPath;
+const title = 'Aster Theme Support · Contact Form For Shopify Store Owners';
+const description = `Get help with the Aster Shopify theme. Send your store URL and a description of the problem and we reply within ${aster.responseDays} business days.`;
+const jsonLd = graph(
+  organization(), website(),
+  { ...webPage({ path, title, description, type: 'ContactPage', breadcrumbs: true }), mainEntity: { '@id': ids.org } },
+  breadcrumbs(path, [{ name: 'Home', path: '/' }, { name: 'Aster Theme', path: aster.docsPath }, { name: 'Support', path }]),
+  faqPage(path, supportFaqs),
+);
+---
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+  <ThemeHero
+    eyebrow="Aster Theme · Support"
+    title={'Need A Hand\nWith Aster?'}
+    lead={`Tell us what happened and where. We reply within ${aster.responseDays} business days, and you’ll get a confirmation email straight away.`}
+    crumbs={[{ name: 'Home', href: '/' }, { name: 'Aster Theme', href: aster.docsPath }, { name: 'Support' }]}
+    chips={[`Reply Within ${aster.responseDays} Business Days`, 'Bug Fixes Included', 'Real Person, Not A Bot']}
+  />
+  <section id="form" class="section container" aria-labelledby="form-heading">
+    <h2 id="form-heading" class="visually-hidden">Support Form</h2>
+    <div class="row">
+      <SupportForm />
+      <SupportAside />
+    </div>
+  </section>
+  <FAQ items={supportFaqs} layout="split" eyebrow="Support · FAQ" title={'How Support\nWorks'} lead="The Short Version Of Who We Help, How Fast, And What Costs Extra." />
+</BaseLayout>
+<style>
+  .row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  @media (min-width: 1100px) { .row { grid-template-columns: minmax(0, 1fr) 446px; align-items: start; } }
+</style>

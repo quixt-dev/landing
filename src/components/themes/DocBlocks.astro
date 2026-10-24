@@ -1,0 +1,36 @@
+---
+/** Renders the structured blocks of one documentation section. */
+import type { Block } from '../../data/aster';
+export interface Props { blocks: Block[] }
+const { blocks } = Astro.props;
+---
+<div class="blocks">
+  {blocks.map((b) => {
+    if (b.type === 'p') return <p class="p">{b.text}</p>;
+    if (b.type === 'steps') return <ol class="steps" role="list">{b.items.map((t, i) => <li><span class="n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span><span>{t}</span></li>)}</ol>;
+    if (b.type === 'list') return <ul class="list" role="list">{b.items.map((t) => <li>{t}</li>)}</ul>;
+    if (b.type === 'dl') return <dl class="dl">{b.items.map((i) => <div class="dl__row"><dt>{i.term}</dt><dd>{i.text}</dd></div>)}</dl>;
+    return <aside class="note"><p class="note__t">{b.title}</p><p>{b.text}</p></aside>;
+  })}
+</div>
+<style>
+  .blocks { display: grid; gap: 24px; }
+  .p { max-width: 62ch; line-height: 1.7; }
+  .steps { display: grid; gap: 8px; max-width: 70ch; }
+  .steps li { display: grid; grid-template-columns: 32px 1fr; gap: 16px; align-items: start; padding: 16px; background: var(--cream); transition: background-color .5s cubic-bezier(.16,1,.3,1), transform .6s cubic-bezier(.16,1,.3,1); line-height: 1.6; }
+  .steps li:hover { background: var(--cream-2); transform: translateX(6px); }
+  .n { width: 32px; height: 32px; display: grid; place-items: center; background: var(--brand); color: var(--white); font-size: 0.78rem; font-weight: 500; }
+  .list { display: grid; gap: 8px; max-width: 70ch; }
+  .list li { position: relative; padding: 12px 0 12px 24px; border-bottom: 1px solid var(--line-soft); line-height: 1.6; }
+  .list li::before { content: ''; position: absolute; left: 0; top: 22px; width: 7px; height: 7px; background: var(--brand); transition: transform .45s cubic-bezier(.34,1.56,.64,1); }
+  .list li:hover::before { transform: rotate(45deg) scale(1.2); }
+  .dl { display: grid; gap: 8px; max-width: 70ch; }
+  .dl__row { display: grid; gap: 4px; padding: 16px; background: var(--cream); border-left: 3px solid var(--brand); transition: background-color .5s cubic-bezier(.16,1,.3,1), transform .6s cubic-bezier(.16,1,.3,1); }
+  .dl__row:hover { background: var(--cream-2); transform: translateX(6px); }
+  dt { font-family: var(--font-display); font-size: 1.0625rem; letter-spacing: var(--track-m); word-spacing: var(--words-m); line-height: 1.3; }
+  dd { line-height: 1.65; color: var(--brand-ink); font-size: var(--fs-small); }
+  .note { background: var(--brand); color: var(--white); padding: 24px; display: grid; gap: 8px; max-width: 70ch; }
+  .note__t { font-weight: 500; }
+  .note p:last-child { color: var(--on-brand-muted); font-size: var(--fs-small); line-height: 1.65; }
+  @media (max-width: 600px) { .steps li, .dl__row, .note { padding-left: var(--card-x-m); padding-right: var(--card-x-m); } }
+</style>
