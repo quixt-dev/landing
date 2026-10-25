@@ -149,8 +149,8 @@ async function handle(kind: Kind, request: Request, env: Env): Promise<Response>
   }
 
   if (kind === 'theme') {
-    // Auto-responder (TS-21.16). Best effort: it never undoes a request that already reached the inbox, and it only
-    // delivers once the Email binding may send to visitors' addresses (see the note on `send_email` in wrangler.jsonc).
+    // Auto-responder (TS-21.16). Best effort: it never undoes a request that already reached the inbox. It needs Email
+    // Sending onboarded for quixt.dev (Workers Paid), since the binding mails the visitor's address.
     try { await env.EMAIL.send(autoReply(env, name, email, themeTyped)); } catch (err) { console.error('auto-responder failed', err); }
   }
 
